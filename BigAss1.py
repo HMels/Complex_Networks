@@ -62,6 +62,7 @@ for t in range(tmax): #generating the adjacency matrix
             if (data[data.timestamp.isin(t)][:,0]==i  and data[data.timestamp.isin(t)][:,0]==j) or (
             data[data.timestamp.isin(t)][:,0]==j  and data[data.timestamp.isin(t)][:,0]==i)
             Mat[i,j,t]=1
+            Mat[j,i,t]=1
 
 for k in range(Nnodes): #diffeerent infection seeds
     s[k,0,k]=1 #first infected node
