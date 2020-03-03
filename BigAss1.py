@@ -48,8 +48,12 @@ print(hopcount_max)
 #print(A)
 eigenvalueA= g.eigen_adjacency()
 print(eigenvalueA)
-Q = g.laplacian(weights=None, normalized=True)
-print(min(i for i in Q if i > 0))  #first non-zero eigenvalue laplacian
+    
+Q = np.array(g.laplacian(weights=None, normalized=False));
+eig = np.linalg.eig(Q)[0];
+eig.sort()
+print(eig[1])
+#print(min(i for i in eig if i > 0))  #first non-zero eigenvalue laplacian
 
 #%% B
 tmax = data('timestamp').max()
@@ -57,12 +61,10 @@ s = np.zeros([Nnodes, tmax+1, Nnodes], dtype = float)
 Mat = np.zeros([Nnodes, Nnodes, tmax])
 
 for t in range(tmax): #generating the adjacency matrix
-    for i in range(Nnodes):
-        for j in range(i):
-            if (data[data.timestamp.isin(t)][:,0]==i  and data[data.timestamp.isin(t)][:,0]==j) or (
-            data[data.timestamp.isin(t)][:,0]==j  and data[data.timestamp.isin(t)][:,0]==i)
-            Mat[i,j,t]=1
-            Mat[j,i,t]=1
+    g1 = igraph.graph()
+    g1.add_vertices(Nnodes)
+    for i in range(Nlinks2)
+
 
 for k in range(Nnodes): #diffeerent infection seeds
     s[k,0,k]=1 #first infected node
