@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Mar  5 10:53:49 2020
+Created on Fri Mar  6 15:31:15 2020
 
 @author: stijn
 """
@@ -9,30 +9,31 @@ import numpy as np
 import pandas as pd
 import igraph as igraph
 import timeit
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 #data = pd.read_excel (r'C:\Users\Thierry\Documents\Studie\TU Delft Applied Physics\CS4195 Modeling and Data Analysis in Complex Networks\Assignment1\manufacturing_emails_temporal_network.xlsx')
-data = pd.read_excel (r'..\manufacturing_emails_temporal_network.xlsx')
+data = pd.read_excel (r'../manufacturing_emails_temporal_network.xlsx')
 #data = pd.read_excel (r'C:\Users\rixtb\Documents\Master\Data analysis\Datasets\oefenset.xlsx')
-
 
 #%% A
 Nnodes = np.max([data['node1'].max(), data['node2'].max()])
-G = data.drop(['timestamp'],axis=1)
-B = G.drop_duplicates()
+B = data.drop_duplicates()
 g = igraph.Graph()
 g.add_vertices(Nnodes)
 
-col1 = B['node1']
-col2 = B['node2']
+col1 = B['node1']; col1 = col1.tolist()
+col2 = B['node2']; col2 = col2.tolist()
+col3 = data['timestamp']; col3 = col3.tolist()
 
-col1 = col1.tolist()
-col2 = col2.tolist()
+shuff = np.random.randint(0,len(col1),len(col3))
+G3 = np.zeros([len(col3),3],dtype=int)
 
-Nlinks = len(B)
+for i in range(len(col3)):
+    G3[i,:]=np.array([col1[shuff[i]],col2[shuff[i]],col3[i]])
+
+Nlinks = len(G3)
 for i in range(Nlinks):
-    g.add_edges([(col1[i]-1,col2[i]-1)])
-    
+    g.add_edges([(G[i,0]-1,G[i,1]-1)])
 
 #%% B
 tmax = data.timestamp.max()
@@ -44,7 +45,7 @@ Aoud = np.eye(Nnodes)
 unit = np.eye(Nnodes)
 
 for i in range(1,tmax+1):
-    data_temp = data[data.timestamp==i].values
+    data_temp = G3[G3[:,2]==i]
     A = np.zeros([Nnodes,Nnodes])
     
     for j in range(len(data_temp)):
@@ -58,7 +59,28 @@ for i in range(1,tmax+1):
         
 stop = timeit.default_timer()
 print('Time:',stop-start)
+
+#%% creating the inter-arrival time histogram
+
+dT = []
+for i in range(1,Nnodes):
+    delta_t = np.array([G3[G3[:,0]==i][:,2]])
+    delta_t = np.append(delta_t,G3[G3[:,1]==i][:,2])
+    delta_t = np.sort(delta_t)  #sorted list of all timestamps that belong to node i
+    if len(delta_t)>1: #must be at least 2 values
+        for j in range(len(delta_t)-1):
+            diff = delta_t[j+1]-delta_t[j] #time difference
+            if diff >0:
+                dT = np.append(dT,diff) #one gigantic list of timedifferences
+    
+plt.hist(dT,bins=100,normed=1)
+plt.xlabel('inter arrival time')
+plt.ylabel('logaritmic frequency')
+plt.gca().set_yscale("log")
+plt.show()
+
 #%% 9
+
 plt.close("all")
 
 ExpVal = np.sum(Infections, axis = 1)/Nnodes
