@@ -12,7 +12,7 @@ import timeit
 import matplotlib.pyplot as plt
 
 #data = pd.read_excel (r'C:\Users\Thierry\Documents\Studie\TU Delft Applied Physics\CS4195 Modeling and Data Analysis in Complex Networks\Assignment1\manufacturing_emails_temporal_network.xlsx')
-data = pd.read_excel (r'manufacturing_emails_temporal_network.xlsx')
+data = pd.read_excel (r'..\manufacturing_emails_temporal_network.xlsx')
 #data = pd.read_excel (r'C:\Users\rixtb\Documents\Master\Data analysis\Datasets\oefenset.xlsx')
 
 
@@ -93,4 +93,7 @@ D.sort(reverse=True)
 
 f = np.linspace(0.05,0.5,10)
 for i in f:
-    Rf =int(round(i*Nnodes))
+    print(i)
+    R_f =round(i*Nnodes)
+    
+    rd_f = 
