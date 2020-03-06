@@ -79,7 +79,7 @@ for k in range(Nnodes):
            R[k] = i+1 
            break
 #%%11
-           
+plt.close("all")
 C = g.transitivity_local_undirected(vertices = None, mode = "zero")
 C_node = np.argsort(C)[::-1]+1
 C.sort(reverse=True)
@@ -97,3 +97,14 @@ for i in range(10):
     C_f = C_node[0:size_R_f]
     rd_f[i] = len(set(R_f).intersection(D_f))/size_R_f
     rc_f[i] = len(set(R_f).intersection(C_f))/size_R_f
+plt.figure()
+plt.xlabel('Fraction of top most influential nodes')
+plt.ylabel('Recognition rate')
+plt.title('Recognition rate using the degree of the nodes')
+plt.plot(f,rd_f)
+
+plt.figure()
+plt.xlabel('Fraction of top most influential nodes')
+plt.ylabel('Recognition rate')
+plt.title('Recognition rate using the clustering coefficient of the nodes')
+plt.plot(f,rc_f)
