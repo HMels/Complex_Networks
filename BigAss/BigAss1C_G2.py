@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Created on Thu Mar  5 10:53:49 2020
+Created on Fri Mar  6 15:31:15 2020
 
 @author: stijn
 """
@@ -9,30 +9,32 @@ import numpy as np
 import pandas as pd
 import igraph as igraph
 import timeit
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 
 #data = pd.read_excel (r'C:\Users\Thierry\Documents\Studie\TU Delft Applied Physics\CS4195 Modeling and Data Analysis in Complex Networks\Assignment1\manufacturing_emails_temporal_network.xlsx')
 data = pd.read_excel (r'..\manufacturing_emails_temporal_network.xlsx')
 #data = pd.read_excel (r'C:\Users\rixtb\Documents\Master\Data analysis\Datasets\oefenset.xlsx')
 
-
 #%% A
 Nnodes = np.max([data['node1'].max(), data['node2'].max()])
-G = data.drop(['timestamp'],axis=1)
+#G = data.drop(['timestamp'],axis=1)
 B = G.drop_duplicates()
 g = igraph.Graph()
 g.add_vertices(Nnodes)
 
-col1 = B['node1']
-col2 = B['node2']
+col1 = G['node1']
+col2 = G['node2']
+col3 = G['timestamp']
 
 col1 = col1.tolist()
 col2 = col2.tolist()
+col3 = col3.tolist()
 
-Nlinks = len(B)
+G2 = np.column_stack(col1,col2)
+
+Nlinks = len(G)
 for i in range(Nlinks):
     g.add_edges([(col1[i]-1,col2[i]-1)])
-    
 
 #%% B
 tmax = data.timestamp.max()
