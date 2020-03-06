@@ -55,7 +55,7 @@ for i in range(1,tmax+1):
     Inf[Inf>0]=1
     Aoud = Inf
     Infections[i-1,:] = np.sum(Inf, axis=0)
-    
+        
 stop = timeit.default_timer()
 print('Time:',stop-start)
 #%% 9
@@ -98,13 +98,97 @@ for i in range(10):
     rd_f[i] = len(set(R_f).intersection(D_f))/size_R_f
     rc_f[i] = len(set(R_f).intersection(C_f))/size_R_f
 plt.figure()
+plt.axes(ylim=(0,1))
 plt.xlabel('Fraction of top most influential nodes')
 plt.ylabel('Recognition rate')
 plt.title('Recognition rate using the degree of the nodes')
 plt.plot(f,rd_f)
 
 plt.figure()
+plt.axes(ylim=(0,1))
 plt.xlabel('Fraction of top most influential nodes')
 plt.ylabel('Recognition rate')
 plt.title('Recognition rate using the clustering coefficient of the nodes')
 plt.plot(f,rc_f)
+#%% 12
+plt.close("all")
+closeness = g.closeness()
+closeness_node = np.argsort(closeness)[::-1]+1
+
+rclose_f = np.zeros(10)
+for i in range(10):
+    size_R_f =int(round(f[i]*Nnodes))
+    R_f = R_node[0:size_R_f]
+    Close_f = closeness_node[0:size_R_f]
+    rclose_f[i] = len(set(R_f).intersection(Close_f))/size_R_f
+plt.figure()
+plt.axes(ylim=(0,1))
+plt.xlabel('Fraction of top most influential nodes')
+plt.ylabel('Recognition rate')
+plt.title('Recognition rate using the closeness of the nodes')
+plt.plot(f,rclose_f)
+
+"""MISSING SECOND METHOD"""
+
+#%% 13
+plt.close("all")
+
+InfectionPerTimestep = np.zeros((tmax,Nnodes))
+infections2 = np.zeros((tmax+1,Nnodes))
+infections2[1:,:] = Infections
+infections2 = np.delete(infections2,tmax,axis=0)
+TimeInfectionPT= np.zeros((tmax,Nnodes))
+R_accent = np.zeros(Nnodes)
+R[Nnodes-1] = tmax
+for j in range(Nnodes):
+    for i in range(int(R[j])):
+        InfectionPerTimestep[i,j] = Infections[i,j] - infections2[i,j]
+        TimeInfectionPT[i,j] = InfectionPerTimestep[i,j]*(i+1) 
+    R_accent[j] = np.sum(TimeInfectionPT[:,j])/(0.8*Nnodes)
+
+R_accent_node = np.argsort(R_accent)+1
+f = np.linspace(0.05,0.5,10)
+rd2_f = np.zeros(10)
+rc2_f = np.zeros(10)
+rr_f = np.zeros(10)
+
+
+for i in range(10):
+    size_R_accent_f =int(round(f[i]*Nnodes))
+    R_accent_f = R_accent_node[0:size_R_accent_f]
+    R_f = R_node[0:size_R_accent_f]
+    D_f = D_node[0:size_R_accent_f]
+    C_f = C_node[0:size_R_accent_f]
+    rd2_f[i] = len(set(R_accent_f).intersection(D_f))/size_R_accent_f
+    rc2_f[i] = len(set(R_accent_f).intersection(C_f))/size_R_accent_f
+    rr_f[i] = len(set(R_accent_f).intersection(R_f))/size_R_accent_f
+plt.figure()
+plt.axes(ylim=(0,1))
+plt.xlabel('Fraction of top most influential nodes')
+plt.ylabel('Recognition rate')
+plt.title('Recognition rate using the degree of the nodes')
+plt.plot(f,rd2_f)
+
+plt.figure()
+plt.axes(ylim=(0,1))
+plt.xlabel('Fraction of top most influential nodes')
+plt.ylabel('Recognition rate')
+plt.title('Recognition rate using the clustering coefficient of the nodes')
+plt.plot(f,rc2_f)
+
+plt.figure()
+plt.axes(ylim=(0,1))
+plt.xlabel('Fraction of top most influential nodes')
+plt.ylabel('Recognition rate')
+plt.title('Recognition rate using the 80 percent ranking R of the nodes')
+plt.plot(f,rr_f)
+
+#plt.figure()
+#plt.plot(1/Average_Time_Infection)
+#plt.figure()
+#plt.plot(1/R)
+
+
+
+
+
