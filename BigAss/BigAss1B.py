@@ -80,20 +80,20 @@ for k in range(Nnodes):
            break
 #%%11
            
-C2 = np.zeros(Nnodes)
-D2 = np.zeros(Nnodes)
-
 C = g.transitivity_local_undirected(vertices = None, mode = "zero")
-C_ind = np.argsort(C)[::-1]+1
+C_node = np.argsort(C)[::-1]+1
 C.sort(reverse=True)
 D = g.outdegree()
-D_ind = np.argsort(D)[::-1]+1
+D_node = np.argsort(D)[::-1]+1
 D.sort(reverse=True)
-    
-
+R_node = np.argsort(R)+1
 f = np.linspace(0.05,0.5,10)
-for i in f:
-    print(i)
-    R_f =round(i*Nnodes)
-    
-    rd_f = 
+rd_f = np.zeros(10)
+rc_f = np.zeros(10)
+for i in range(10):
+    size_R_f =int(round(f[i]*Nnodes))
+    R_f = R_node[0:size_R_f]
+    D_f = D_node[0:size_R_f]
+    C_f = C_node[0:size_R_f]
+    rd_f[i] = len(set(R_f).intersection(D_f))/size_R_f
+    rc_f[i] = len(set(R_f).intersection(C_f))/size_R_f
