@@ -28,14 +28,21 @@ col3 = data['timestamp']; col3 = col3.tolist()
 
 np.random.seed(10)
 shuff = np.random.randint(0,len(col1),len(col3))
-G3 = np.zeros([len(col3),3],dtype=int)
+G3 = np.zeros([len(col3),4],dtype=int)
 
 for i in range(len(col3)):
-    G3[i,:]=np.array([col1[shuff[i]],col2[shuff[i]],col3[i]])
+    G3[i,:]=np.array([col1[shuff[i]],col2[shuff[i]],col3[i],shuff[i]]) #the last shuff[i] is to save the number of the link pair chosen
+    
+G3_temp = G3[:,:2]
+G3_temp = pd.DataFrame(G3_temp,index=G3_temp[:,0])
+G3_rm =G3_temp.drop_duplicates()
 
-Nlinks = len(B)
+col1 = G3_rm[0]; col2 = G3_rm[1]
+col1 = col1.tolist(); col2 = col2.tolist()
+
+Nlinks = len(G3_rm)
 for i in range(Nlinks):
-    g.add_edges([(G3[i,0]-1,G3[i,1]-1)])
+    g.add_edges([(col1[i]-1,col2[i]-1)])
 
 #%% B
 tmax = data.timestamp.max()
@@ -65,20 +72,17 @@ print('Time:',stop-start)
 #%% creating the inter-arrival time histogram
 
 dT = []
-for i in range(1,Nnodes):
-    delta_t = np.array([G3[G3[:,0]==i][:,2]])
-    delta_t = np.append(delta_t,G3[G3[:,1]==i][:,2])
+for i in range(len(B)):
+    delta_t = np.array([G3[G3[:,3]==i][:,2]])
     delta_t = np.sort(delta_t)  #sorted list of all timestamps that belong to node i
-    if len(delta_t)>1: #must be at least 2 values
-        for j in range(len(delta_t)-1):
-            diff = delta_t[j+1]-delta_t[j] #time difference
-            if diff >0:
-                dT = np.append(dT,diff) #one gigantic list of timedifferences
-    
-plt.hist(dT,bins=100,normed=1)
+    if len(delta_t[0,:])>1: #must be at least 2 values
+        for j in range(len(delta_t[0,:])-1):
+            diff = delta_t[0,j+1]-delta_t[0,j] #time difference
+            dT = np.append(dT,diff) #one gigantic list of timedifferences
+            
+plt.hist(dT,100)
 plt.xlabel('inter arrival time')
-plt.ylabel('logaritmic frequency')
-plt.gca().set_yscale("log")
+plt.ylabel('frequency')
 plt.show()
 
 #%% 9
