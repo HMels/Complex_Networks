@@ -26,6 +26,7 @@ col1 = B['node1']; col1 = col1.tolist()
 col2 = B['node2']; col2 = col2.tolist()
 col3 = data['timestamp']; col3 = col3.tolist()
 
+np.random.seed(10)
 shuff = np.random.randint(0,len(col1),len(col3))
 G3 = np.zeros([len(col3),3],dtype=int)
 
