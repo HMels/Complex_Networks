@@ -3,7 +3,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 #data = pd.read_excel (r'C:\Users\Thierry\Documents\Studie\TU Delft Applied Physics\CS4195 Modeling and Data Analysis in Complex Networks\Assignment1\manufacturing_emails_temporal_network.xlsx')
 data = pd.read_excel (r'C:\Users\cleoo\Documents\Complex Network\manufacturing_emails_temporal_network.xlsx')
-Gdata = data
+data = data.drop_duplicates()
+Gdata = data  #Make sure Gdata does not have duplicate time elements.
 
 #%% Create new data for G2 and G3
 from random import shuffle
@@ -16,6 +17,7 @@ G2['node1'] = node1
 G2['node2'] = node2
 G2['timestamp']= time
 G2 = G2.sort_values(by='timestamp',ignore_index=True) #resort
+G2 = G2.drop_duplicates()
 
 #Creating G3
 G = data.drop(['timestamp'],axis=1)
@@ -34,6 +36,7 @@ G3 = pd.DataFrame()
 G3['node1'] = new_node1
 G3['node2'] = new_node2
 G3['timestamp']= time
+G3 = G3.drop_duplicates()
 
 #%% Find interarrival times
 def arrival_times(df):
@@ -51,3 +54,5 @@ t2 = arrival_times(G2)
 t3 = arrival_times(G3)
 
 #%% Plot the interarrival times in histograms
+plt.hist(t2)
+plt.show()
