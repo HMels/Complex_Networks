@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 data = pd.read_excel (r'..\manufacturing_emails_temporal_network.xlsx')
 
 """Create G2 by randomly shuffling the rows of the data set and resetting the indices"""
-data['timestamp'] = data['timestamp'].sample(frac=1).reset_index(drop=True)
+data['timestamp'] = data['timestamp'].sample(frac=1,random_state = 10).reset_index(drop=True)
 data = data.sort_values(by='timestamp', axis =0 )
 data = data.reset_index(drop=True)
 
@@ -150,7 +150,10 @@ infections2 = np.delete(infections2,tmax,axis=0)
 TimeInfectionPT= np.zeros((tmax,Nnodes))
 R_accent = np.zeros(Nnodes)
 R[Nnodes-1] = tmax
+
 for j in range(Nnodes):
+    if np.isnan(R[j]) == True:
+        R[j] = tmax
     for i in range(int(R[j])):
         InfectionPerTimestep[i,j] = Infections[i,j] - infections2[i,j]
         TimeInfectionPT[i,j] = InfectionPerTimestep[i,j]*(i+1) 

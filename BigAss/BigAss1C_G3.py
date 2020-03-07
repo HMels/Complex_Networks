@@ -9,7 +9,7 @@ import numpy as np
 import pandas as pd
 import igraph as igraph
 import timeit
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
 #data = pd.read_excel (r'C:\Users\Thierry\Documents\Studie\TU Delft Applied Physics\CS4195 Modeling and Data Analysis in Complex Networks\Assignment1\manufacturing_emails_temporal_network.xlsx')
 data = pd.read_excel (r'../manufacturing_emails_temporal_network.xlsx')
@@ -17,6 +17,7 @@ data = pd.read_excel (r'../manufacturing_emails_temporal_network.xlsx')
 
 #%% A
 Nnodes = np.max([data['node1'].max(), data['node2'].max()])
+G = data.drop(['timestamp'],axis=1)
 B = data.drop_duplicates()
 g = igraph.Graph()
 g.add_vertices(Nnodes)
@@ -31,9 +32,9 @@ G3 = np.zeros([len(col3),3],dtype=int)
 for i in range(len(col3)):
     G3[i,:]=np.array([col1[shuff[i]],col2[shuff[i]],col3[i]])
 
-Nlinks = len(G3)
+Nlinks = len(B)
 for i in range(Nlinks):
-    g.add_edges([(G[i,0]-1,G[i,1]-1)])
+    g.add_edges([(G3[i,0]-1,G3[i,1]-1)])
 
 #%% B
 tmax = data.timestamp.max()
@@ -90,7 +91,7 @@ t=np.linspace(1,tmax,len(ExpVal))
 plt.axes(xlim=(1,tmax))
 plt.xlabel('Time(s)')
 plt.ylabel('Average Infected Nodes')
-plt.title('Average Infected Nodes Versus Time With Corresponding Standard Deviation')
+plt.title('Average Infected Nodes Versus Time With Corresponding Standard Deviation (G3)')
 plt.errorbar(t,ExpVal,yerr = StandardDev, errorevery = 100, ecolor = 'r', color = 'k')
 #%% 10
 R = np.ones(Nnodes)*float('nan')
@@ -123,14 +124,14 @@ plt.figure()
 plt.axes(ylim=(0,1))
 plt.xlabel('Fraction of top most influential nodes')
 plt.ylabel('Recognition rate')
-plt.title('Recognition rate using the degree of the nodes')
+plt.title('Recognition rate using the degree of the nodes (G3)')
 plt.plot(f,rd_f)
 
 plt.figure()
 plt.axes(ylim=(0,1))
 plt.xlabel('Fraction of top most influential nodes')
 plt.ylabel('Recognition rate')
-plt.title('Recognition rate using the clustering coefficient of the nodes')
+plt.title('Recognition rate using the clustering coefficient of the nodes (G3)')
 plt.plot(f,rc_f)
 #%% 12
 plt.close("all")
@@ -147,7 +148,7 @@ plt.figure()
 plt.axes(ylim=(0,1))
 plt.xlabel('Fraction of top most influential nodes')
 plt.ylabel('Recognition rate')
-plt.title('Recognition rate using the closeness of the nodes')
+plt.title('Recognition rate using the closeness of the nodes (G3)')
 plt.plot(f,rclose_f)
 
 """MISSING SECOND METHOD"""
@@ -188,21 +189,21 @@ plt.figure()
 plt.axes(ylim=(0,1))
 plt.xlabel('Fraction of top most influential nodes')
 plt.ylabel('Recognition rate')
-plt.title('Recognition rate using the degree of the nodes')
+plt.title('Recognition rate using the degree of the nodes (G3)')
 plt.plot(f,rd2_f)
 
 plt.figure()
 plt.axes(ylim=(0,1))
 plt.xlabel('Fraction of top most influential nodes')
 plt.ylabel('Recognition rate')
-plt.title('Recognition rate using the clustering coefficient of the nodes')
+plt.title('Recognition rate using the clustering coefficient of the nodes (G3)')
 plt.plot(f,rc2_f)
 
 plt.figure()
 plt.axes(ylim=(0,1))
 plt.xlabel('Fraction of top most influential nodes')
 plt.ylabel('Recognition rate')
-plt.title('Recognition rate using the 80 percent ranking R of the nodes')
+plt.title('Recognition rate using the 80 percent ranking R of the nodes (G3)')
 plt.plot(f,rr_f)
 
 #plt.figure()
