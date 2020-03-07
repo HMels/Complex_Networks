@@ -9,32 +9,40 @@ import numpy as np
 import pandas as pd
 import igraph as igraph
 import timeit
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
-#data = pd.read_excel (r'C:\Users\Thierry\Documents\Studie\TU Delft Applied Physics\CS4195 Modeling and Data Analysis in Complex Networks\Assignment1\manufacturing_emails_temporal_network.xlsx')
 data = pd.read_excel (r'..\manufacturing_emails_temporal_network.xlsx')
+
+"""Create G2 by randomly shuffling the rows of the data set and resetting the indices"""
+data['timestamp'] = data['timestamp'].sample(frac=1,random_state = 10).reset_index(drop=True)
+data = data.sort_values(by='timestamp', axis =0 )
+data = data.reset_index(drop=True)
+
 #data = pd.read_excel (r'C:\Users\rixtb\Documents\Master\Data analysis\Datasets\oefenset.xlsx')
 
 #%% A
+start = timeit.default_timer()
+
 Nnodes = np.max([data['node1'].max(), data['node2'].max()])
-#G = data.drop(['timestamp'],axis=1)
+G = data.drop(['timestamp'],axis=1)
 B = G.drop_duplicates()
 g = igraph.Graph()
 g.add_vertices(Nnodes)
 
-col1 = G['node1']
-col2 = G['node2']
-col3 = G['timestamp']
+col1 = B['node1']
+col2 = B['node2']
+#col3 = data['timestamp']
 
 col1 = col1.tolist()
 col2 = col2.tolist()
-col3 = col3.tolist()
+#col3 = col3.tolist()
 
-G2 = np.column_stack(col1,col2)
-
-Nlinks = len(G)
+Nlinks = len(B)
 for i in range(Nlinks):
     g.add_edges([(col1[i]-1,col2[i]-1)])
+    
+stop = timeit.default_timer()
+print('Time:',stop-start)
 
 #%% B
 tmax = data.timestamp.max()
@@ -70,7 +78,7 @@ t=np.linspace(1,tmax,len(ExpVal))
 plt.axes(xlim=(1,tmax))
 plt.xlabel('Time(s)')
 plt.ylabel('Average Infected Nodes')
-plt.title('Average Infected Nodes Versus Time With Corresponding Standard Deviation')
+plt.title('Average Infected Nodes Versus Time With Corresponding Standard Deviation (G2)')
 plt.errorbar(t,ExpVal,yerr = StandardDev, errorevery = 100, ecolor = 'r', color = 'k')
 #%% 10
 R = np.ones(Nnodes)*float('nan')
@@ -103,14 +111,14 @@ plt.figure()
 plt.axes(ylim=(0,1))
 plt.xlabel('Fraction of top most influential nodes')
 plt.ylabel('Recognition rate')
-plt.title('Recognition rate using the degree of the nodes')
+plt.title('Recognition rate using the degree of the nodes (G2)')
 plt.plot(f,rd_f)
 
 plt.figure()
 plt.axes(ylim=(0,1))
 plt.xlabel('Fraction of top most influential nodes')
 plt.ylabel('Recognition rate')
-plt.title('Recognition rate using the clustering coefficient of the nodes')
+plt.title('Recognition rate using the clustering coefficient of the nodes (G2)')
 plt.plot(f,rc_f)
 #%% 12
 plt.close("all")
@@ -127,7 +135,7 @@ plt.figure()
 plt.axes(ylim=(0,1))
 plt.xlabel('Fraction of top most influential nodes')
 plt.ylabel('Recognition rate')
-plt.title('Recognition rate using the closeness of the nodes')
+plt.title('Recognition rate using the closeness of the nodes (G2)')
 plt.plot(f,rclose_f)
 
 """MISSING SECOND METHOD"""
@@ -142,7 +150,10 @@ infections2 = np.delete(infections2,tmax,axis=0)
 TimeInfectionPT= np.zeros((tmax,Nnodes))
 R_accent = np.zeros(Nnodes)
 R[Nnodes-1] = tmax
+
 for j in range(Nnodes):
+    if np.isnan(R[j]) == True:
+        R[j] = tmax
     for i in range(int(R[j])):
         InfectionPerTimestep[i,j] = Infections[i,j] - infections2[i,j]
         TimeInfectionPT[i,j] = InfectionPerTimestep[i,j]*(i+1) 
@@ -168,21 +179,21 @@ plt.figure()
 plt.axes(ylim=(0,1))
 plt.xlabel('Fraction of top most influential nodes')
 plt.ylabel('Recognition rate')
-plt.title('Recognition rate using the degree of the nodes')
+plt.title('Recognition rate using the degree of the nodes (G2)')
 plt.plot(f,rd2_f)
 
 plt.figure()
 plt.axes(ylim=(0,1))
 plt.xlabel('Fraction of top most influential nodes')
 plt.ylabel('Recognition rate')
-plt.title('Recognition rate using the clustering coefficient of the nodes')
+plt.title('Recognition rate using the clustering coefficient of the nodes (G2)')
 plt.plot(f,rc2_f)
 
 plt.figure()
 plt.axes(ylim=(0,1))
 plt.xlabel('Fraction of top most influential nodes')
 plt.ylabel('Recognition rate')
-plt.title('Recognition rate using the 80 percent ranking R of the nodes')
+plt.title('Recognition rate using the 80 percent ranking R of the nodes (G2)')
 plt.plot(f,rr_f)
 
 #plt.figure()
