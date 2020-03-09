@@ -54,5 +54,35 @@ t2 = arrival_times(G2)
 t3 = arrival_times(G3)
 
 #%% Plot the interarrival times in histograms
-plt.hist(t2)
+t = t1
+binwidth = 500
+plt.hist(t, bins=np.arange(min(t), max(t) + binwidth, binwidth),density=True)
+plt.xlim(0,20000)
+plt.xlabel('Inter-arrival times')
+plt.ylabel('Fraction of total number of inter-arrival times')
 plt.show()
+
+#%% Exploring temporal features of the network Gdata: interevent time
+
+# Temporal degree??
+df = Gdata
+node1 = df['node1'].tolist(); node2 = df['node2'].tolist(); time = df['timestamp'].tolist()
+Nnodes = max(node2)
+TempD = np.zeros(Nnodes)
+for i in range(Nnodes):
+    node = i+1
+    TempD[i] = node1.count(node)+node2.count(node)
+
+#average inter-event time: average time for one event on a node to a new event
+k=0
+events = np.zeros(Nnodes)
+for i in range(Nnodes):
+    node = i+1
+    times = []
+    for j in range(len(time)):
+        if ((node1[j]==node) or (node2[j]==node)):
+            times.append(time[j])
+    ti = np.argwhere(np.diff(times))
+    if len(ti)!=0:
+        events[i] = sum(ti)/len(ti)
+
