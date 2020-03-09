@@ -103,9 +103,9 @@ R = np.ones(Nnodes)*float('nan')
 
 for k in range(Nnodes):
     for i in range(tmax):
-       if Infections[i,k] > 0.8*Nnodes:
-           R[k] = i+1 
-           break
+        if Infections[i,k] > 0.8*Nnodes:
+            R[k] = i+1 
+            break
 #%%11
 plt.close("all")
 C = g.transitivity_local_undirected(vertices = None, mode = "zero")
