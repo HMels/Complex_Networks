@@ -169,6 +169,8 @@ TimeInfectionPT= np.zeros((tmax,Nnodes))
 R_accent = np.zeros(Nnodes)
 R[Nnodes-1] = tmax
 for j in range(Nnodes):
+    if np.isnan(R[j]) == True:
+        R[j] = tmax
     for i in range(int(R[j])):
         InfectionPerTimestep[i,j] = Infections[i,j] - infections2[i,j]
         TimeInfectionPT[i,j] = InfectionPerTimestep[i,j]*(i+1) 

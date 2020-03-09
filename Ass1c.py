@@ -1,8 +1,8 @@
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-#data = pd.read_excel (r'C:\Users\Thierry\Documents\Studie\TU Delft Applied Physics\CS4195 Modeling and Data Analysis in Complex Networks\Assignment1\manufacturing_emails_temporal_network.xlsx')
-data = pd.read_excel (r'C:\Users\cleoo\Documents\Complex Network\manufacturing_emails_temporal_network.xlsx')
+data = pd.read_excel (r'C:\Users\Thierry\Documents\Studie\TU Delft Applied Physics\CS4195 Modeling and Data Analysis in Complex Networks\Assignment1\manufacturing_emails_temporal_network.xlsx')
+#data = pd.read_excel (r'C:\Users\cleoo\Documents\Complex Network\manufacturing_emails_temporal_network.xlsx')
 data = data.drop_duplicates()
 Gdata = data  #Make sure Gdata does not have duplicate time elements.
 
@@ -54,5 +54,8 @@ t2 = arrival_times(G2)
 t3 = arrival_times(G3)
 
 #%% Plot the interarrival times in histograms
-plt.hist(t2)
+Nbins = 100
+plt.hist(t3,Nbins)
+plt.xlabel('Inter-arrival time')
+plt.ylabel('#')
 plt.show()
