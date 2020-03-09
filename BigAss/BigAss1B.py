@@ -12,9 +12,9 @@ import timeit
 import matplotlib.pyplot as plt
 
 #data = pd.read_excel (r'C:\Users\Thierry\Documents\Studie\TU Delft Applied Physics\CS4195 Modeling and Data Analysis in Complex Networks\Assignment1\manufacturing_emails_temporal_network.xlsx')
-data = pd.read_excel (r'..\manufacturing_emails_temporal_network.xlsx')
+#data = pd.read_excel (r'..\manufacturing_emails_temporal_network.xlsx')
 #data = pd.read_excel (r'C:\Users\rixtb\Documents\Master\Data analysis\Datasets\oefenset.xlsx')
-
+data = pd.read_excel (r'C:\Users\rixtb\Documents\Master\Data analysis\Datasets\manufacturing_emails_temporal_network.xlsx')
 
 #%% A
 Nnodes = np.max([data['node1'].max(), data['node2'].max()])
@@ -89,7 +89,7 @@ t=np.linspace(1,tmax,len(ExpVal))
 plt.axes(xlim=(1,tmax))
 plt.xlabel('Time(s)')
 plt.ylabel('Average Infected Nodes')
-plt.title('Average Infected Nodes Versus Time With Corresponding Standard Deviation')
+#plt.title('Average Infected Nodes Versus Time With Corresponding Standard Deviation')
 plt.errorbar(t,ExpVal,yerr = StandardDev, errorevery = 100, ecolor = 'r', color = 'k')
 #%% 10
 R = np.ones(Nnodes)*float('nan')

@@ -12,9 +12,9 @@ import timeit
 import matplotlib.pyplot as plt
 
 #data = pd.read_excel (r'C:\Users\Thierry\Documents\Studie\TU Delft Applied Physics\CS4195 Modeling and Data Analysis in Complex Networks\Assignment1\manufacturing_emails_temporal_network.xlsx')
-data = pd.read_excel (r'../manufacturing_emails_temporal_network.xlsx')
+#data = pd.read_excel (r'../manufacturing_emails_temporal_network.xlsx')
 #data = pd.read_excel (r'C:\Users\rixtb\Documents\Master\Data analysis\Datasets\oefenset.xlsx')
-data = data.drop_duplicates()
+data = pd.read_excel (r'C:\Users\rixtb\Documents\Master\Data analysis\Datasets\manufacturing_emails_temporal_network.xlsx')
 
 #%% A
 Nnodes = np.max([data['node1'].max(), data['node2'].max()])
@@ -92,13 +92,13 @@ plt.close("all")
 
 ExpVal = np.sum(Infections, axis = 1)/Nnodes
 StandardDev = np.std(Infections, axis = 1)
-
 t=np.linspace(1,tmax,len(ExpVal))
 plt.axes(xlim=(1,tmax))
 plt.xlabel('Time(s)')
 plt.ylabel('Average Infected Nodes')
-plt.title('Average Infected Nodes Versus Time With Corresponding Standard Deviation (G3)')
+#plt.title('Average Infected Nodes Versus Time With Corresponding Standard Deviation (G3)')
 plt.errorbar(t,ExpVal,yerr = StandardDev, errorevery = 100, ecolor = 'r', color = 'k')
+
 #%% 10
 R = np.ones(Nnodes)*float('nan')
 
@@ -192,7 +192,10 @@ for i in range(10):
     C_f = C_node[0:size_R_accent_f]
     rd2_f[i] = len(set(R_accent_f).intersection(D_f))/size_R_accent_f
     rc2_f[i] = len(set(R_accent_f).intersection(C_f))/size_R_accent_f
+    rclose2_f[i] = len(set(R_accent_f).intersection(Close_f))/size_R_accent_f
     rr_f[i] = len(set(R_accent_f).intersection(R_f))/size_R_accent_f
+    revents2_f[i] = len(set(R_f).intersection(events_f))/size_R_f
+
 plt.figure()
 plt.axes(ylim=(0,1))
 plt.xlabel('Fraction of top most influential nodes')
@@ -214,10 +217,46 @@ plt.ylabel('Recognition rate')
 plt.title('Recognition rate using the 80 percent ranking R of the nodes (G3)')
 plt.plot(f,rr_f)
 
+plt.figure()
+plt.axes(ylim=(0,1))
+plt.xlabel('Fraction of top most influential nodes')
+plt.ylabel('Recognition rate')
+plt.title('Recognition rate using the clustering coefficient of the nodes (G2)')
+plt.plot(f,rclose2_f)
+
 #plt.figure()
 #plt.plot(1/Average_Time_Infection)
 #plt.figure()
 #plt.plot(1/R)
+
+#%%
+plt.close("all")
+plt.figure()
+plt.axes(ylim=(0,1))
+plt.xlabel('Fraction of top most influential nodes')
+plt.ylabel('Recognition rate')
+#plt.title('Metric comparison to the R vector (G2)')
+plt.plot(f,rd_f)
+plt.plot(f,rc_f)
+plt.plot(f,rclose_f)
+plt.plot(f,revents_f)
+plt.legend(('Degree', 'Clustering coefficient','Closeness', 'Number of events'))
+
+plt.figure()
+plt.axes(ylim=(0,1))
+plt.xlabel('Fraction of top most influential nodes')
+plt.ylabel('Recognition rate')
+#plt.title("Metric comparison to the R' vector (G2)")
+plt.plot(f,rd2_f)
+plt.plot(f,rc2_f)
+plt.plot(f,rclose2_f)
+plt.plot(f,rr_f)
+plt.plot(f,revents2_f)
+plt.legend(('Degree', 'Clustering coefficient','Closeness','R vector', 'Number of events'))
+
+
+
+
 
 
 

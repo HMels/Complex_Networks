@@ -11,13 +11,11 @@ import igraph as igraph
 import timeit
 import matplotlib.pyplot as plt
 
-data = pd.read_excel (r'..\manufacturing_emails_temporal_network.xlsx')
-data = data.drop_duplicates()
+data = pd.read_excel (r'C:\Users\rixtb\Documents\Master\Data analysis\Datasets\manufacturing_emails_temporal_network.xlsx')
 """Create G2 by randomly shuffling the rows of the data set and resetting the indices"""
 data['timestamp'] = data['timestamp'].sample(frac=1,random_state = 10).reset_index(drop=True)
 data = data.sort_values(by='timestamp', axis =0 )
 data = data.reset_index(drop=True)
-
 #data = pd.read_excel (r'C:\Users\rixtb\Documents\Master\Data analysis\Datasets\oefenset.xlsx')
 
 #%% A
@@ -101,7 +99,7 @@ t=np.linspace(1,tmax,len(ExpVal))
 plt.axes(xlim=(1,tmax))
 plt.xlabel('Time(s)')
 plt.ylabel('Average Infected Nodes')
-plt.title('Average Infected Nodes Versus Time With Corresponding Standard Deviation (G2)')
+#plt.title('Average Infected Nodes Versus Time With Corresponding Standard Deviation (G2)')
 plt.errorbar(t,ExpVal,yerr = StandardDev, errorevery = 100, ecolor = 'r', color = 'k')
 #%% 10
 R = np.ones(Nnodes)*float('nan')
@@ -164,6 +162,8 @@ plt.plot(f,rclose_f)
 """MISSING SECOND METHOD"""
 #%% Time node is reached
 plt.close("all")
+dataevents = data.drop_duplicates()
+G = data.drop(['timestamp'],axis=1)
 events = G.sort_values(by=['node1', 'node2'])
 
 col1 = events['node1']
@@ -215,6 +215,8 @@ f = np.linspace(0.05,0.5,10)
 rd2_f = np.zeros(10)
 rc2_f = np.zeros(10)
 rr_f = np.zeros(10)
+rclose2_f = np.zeros(10)
+revents2_f = np.zeros(10)
 
 
 for i in range(10):
@@ -223,9 +225,14 @@ for i in range(10):
     R_f = R_node[0:size_R_accent_f]
     D_f = D_node[0:size_R_accent_f]
     C_f = C_node[0:size_R_accent_f]
+    events_f = events_node[0:size_R_f]
+    Close_f = closeness_node[0:size_R_accent_f]
     rd2_f[i] = len(set(R_accent_f).intersection(D_f))/size_R_accent_f
     rc2_f[i] = len(set(R_accent_f).intersection(C_f))/size_R_accent_f
+    rclose2_f[i] = len(set(R_accent_f).intersection(Close_f))/size_R_accent_f
     rr_f[i] = len(set(R_accent_f).intersection(R_f))/size_R_accent_f
+    revents2_f[i] = len(set(R_f).intersection(events_f))/size_R_f
+    
 plt.figure()
 plt.axes(ylim=(0,1))
 plt.xlabel('Fraction of top most influential nodes')
@@ -252,7 +259,30 @@ plt.plot(f,rr_f)
 #plt.figure()
 #plt.plot(1/R)
 
+#%%
+plt.close("all")
+plt.figure()
+plt.axes(ylim=(0,1))
+plt.xlabel('Fraction of top most influential nodes')
+plt.ylabel('Recognition rate')
+#plt.title('Metric comparison to the R vector (G2)')
+plt.plot(f,rd_f)
+plt.plot(f,rc_f)
+plt.plot(f,rclose_f)
+plt.plot(f,revents_f)
+plt.legend(('Degree', 'Clustering coefficient','Closeness', 'Number of events'))
 
+plt.figure()
+plt.axes(ylim=(0,1))
+plt.xlabel('Fraction of top most influential nodes')
+plt.ylabel('Recognition rate')
+#plt.title("Metric comparison to the R' vector (G2)")
+plt.plot(f,rd2_f)
+plt.plot(f,rc2_f)
+plt.plot(f,rclose2_f)
+plt.plot(f,rr_f)
+plt.plot(f,revents2_f)
+plt.legend(('Degree', 'Clustering coefficient','Closeness','R vector', 'Number of events'))
 
 
 
