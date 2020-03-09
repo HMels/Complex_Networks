@@ -12,7 +12,7 @@ import timeit
 import matplotlib.pyplot as plt
 
 data = pd.read_excel (r'..\manufacturing_emails_temporal_network.xlsx')
-
+data = data.drop_duplicates()
 """Create G2 by randomly shuffling the rows of the data set and resetting the indices"""
 data['timestamp'] = data['timestamp'].sample(frac=1,random_state = 10).reset_index(drop=True)
 data = data.sort_values(by='timestamp', axis =0 )
@@ -68,6 +68,29 @@ for i in range(1,tmax+1):
         
 stop = timeit.default_timer()
 print('Time:',stop-start)
+
+#%% creating the inter-arrival time histogram
+
+BB=np.round(np.linspace(0,len(B)-1,len(B)),0)
+B1 = B.assign(i=BB)
+
+GG = pd.merge(data, B1, on = ['node1','node2'], how='left')        
+#GG2 = np.zeros([len(GG['node1']),4])
+GG = np.array([GG['node1'].tolist(),GG['node2'].tolist(),GG['timestamp'].tolist(),GG['i'].tolist()]).T
+
+dT = []
+for i in range(len(B)):
+    delta_t = np.array([GG[GG[:,3]==i][:,2]])
+    delta_t = np.sort(delta_t)  #sorted list of all timestamps that belong to node i
+    if len(delta_t[0,:])>1: #must be at least 2 values
+        for j in range(len(delta_t[0,:])-1):
+            diff = delta_t[0,j+1]-delta_t[0,j] #time difference
+            dT = np.append(dT,diff) #one gigantic list of timedifferences
+            
+plt.hist(dT,100)
+plt.xlabel('inter arrival time')
+plt.ylabel('frequency')
+plt.show()
 #%% 9
 plt.close("all")
 
@@ -139,7 +162,35 @@ plt.title('Recognition rate using the closeness of the nodes (G2)')
 plt.plot(f,rclose_f)
 
 """MISSING SECOND METHOD"""
+#%% Time node is reached
+plt.close("all")
+events = G.sort_values(by=['node1', 'node2'])
 
+col1 = events['node1']
+col2 = events['node2']
+#col3 = data['timestamp']
+
+col1 = col1.tolist()
+col2 = col2.tolist()
+#col3 = col3.tolist()
+col=np.append(col1,col2)
+countevents = pd.value_counts(col)
+events_node=countevents.index
+events_node=events_node.tolist()
+
+
+revents_f = np.zeros(10)
+for i in range(10):
+    size_R_f =int(round(f[i]*Nnodes))
+    R_f = R_node[0:size_R_f]
+    events_f = events_node[0:size_R_f]
+    revents_f[i] = len(set(R_f).intersection(events_f))/size_R_f
+plt.figure()
+plt.axes(ylim=(0,1))
+plt.xlabel('Fraction of top most influential nodes')
+plt.ylabel('Recognition rate')
+plt.title('Recognition rate using the time of events of the nodes (G2)')
+plt.plot(f,revents_f)
 #%% 13
 plt.close("all")
 

@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 #data = pd.read_excel (r'C:\Users\Thierry\Documents\Studie\TU Delft Applied Physics\CS4195 Modeling and Data Analysis in Complex Networks\Assignment1\manufacturing_emails_temporal_network.xlsx')
 data = pd.read_excel (r'C:\Users\rixtb\Documents\Master\Data analysis\Datasets\manufacturing_emails_temporal_network.xlsx')
 #data = pd.read_excel (r'C:\Users\rixtb\Documents\Master\Data analysis\Datasets\oefenset.xlsx')
-
+data = data.drop_duplicates()
 #%% A
 Nnodes = np.max([data['node1'].max(), data['node2'].max()])
 G = data.drop(['timestamp'],axis=1)
@@ -63,7 +63,7 @@ Mat = np.zeros([Nnodes, Nnodes, tmax])
 for t in range(tmax): #generating the adjacency matrix
     g1 = igraph.graph()
     g1.add_vertices(Nnodes)
-    for i in range(Nlinks2)
+    for i in range(Nlinks2):
 
 
 for k in range(Nnodes): #diffeerent infection seeds

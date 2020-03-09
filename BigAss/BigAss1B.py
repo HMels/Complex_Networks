@@ -33,7 +33,28 @@ Nlinks = len(B)
 for i in range(Nlinks):
     g.add_edges([(col1[i]-1,col2[i]-1)])
     
+#%% creating the inter-arrival time histogram
 
+BB=np.round(np.linspace(0,len(B)-1,len(B)),0)
+B1 = B.assign(i=BB)
+
+GG = pd.merge(data, B1, on = ['node1','node2'], how='left')        
+#GG2 = np.zeros([len(GG['node1']),4])
+GG = np.array([GG['node1'].tolist(),GG['node2'].tolist(),GG['timestamp'].tolist(),GG['i'].tolist()]).T
+
+dT = []
+for i in range(len(B)):
+    delta_t = np.array([GG[GG[:,3]==i][:,2]])
+    delta_t = np.sort(delta_t)  #sorted list of all timestamps that belong to node i
+    if len(delta_t[0,:])>1: #must be at least 2 values
+        for j in range(len(delta_t[0,:])-1):
+            diff = delta_t[0,j+1]-delta_t[0,j] #time difference
+            dT = np.append(dT,diff) #one gigantic list of timedifferences
+            
+plt.hist(dT,100)
+plt.xlabel('inter arrival time')
+plt.ylabel('frequency')
+plt.show()
 #%% B
 tmax = data.timestamp.max()
 Infections = np.zeros([tmax,Nnodes])
