@@ -1,0 +1,667 @@
+<!doctype html>
+<html>
+
+<head>
+  <!-- Google Tag Manager -->
+  <script>(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+  new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+  j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+  'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+  })(window,document,'script','dataLayer','GTM-MXWPFC5');</script>
+  <!-- End Google Tag Manager -->
+  <title>
+    
+      COVID-19 dynamics with SIR model
+    
+  </title>
+
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta charset="utf-8">
+
+  <link rel="stylesheet" href="/assets/css/main.css">
+  <link rel="stylesheet" href="/assets/css/syntax.css">
+  <!-- <link rel="stylesheet" href="/css/main.css"> -->
+  <!-- <link rel="stylesheet" href="/css/syntax.css"> -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto+Slab:300,400&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT+Serif:400,400italic,700%7CPT+Sans:400">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Code+Pro">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Quattrocento+Sans">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+
+  <script type="text/javascript" async
+    src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js?config=TeX-MML-AM_CHTML">
+    MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [['$', '$'], ['\\(', '\\)']]
+        }
+      });
+  </script>
+
+  <!-- Google Analytics -->
+  <script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-44055098-1', 'auto');
+  ga('send', 'pageview');
+</script>
+
+
+  <!-- Use Jekyll SEO plugin -->
+  <!-- Begin Jekyll SEO tag v2.6.1 -->
+<title>COVID-19 dynamics with SIR model | The First Cry of Atom</title>
+<meta name="generator" content="Jekyll v3.8.5" />
+<meta property="og:title" content="COVID-19 dynamics with SIR model" />
+<meta name="author" content="Kai Sasaki" />
+<meta property="og:locale" content="en_US" />
+<meta name="description" content="The outbreak of the novel coronavirus disease (Covid-19) brought considerable turmoil all around the world. Although the number of new patients in the mainland Child is restrained, the other countries are still struggling with the increasing number of new cases. I sincerely hope the situation will get better soon. At the same time, I am interested in how the spread of infectious diseases such as Covid-19 can happen. Is there anything we know about the mechanism of the spread disease?" />
+<meta property="og:description" content="The outbreak of the novel coronavirus disease (Covid-19) brought considerable turmoil all around the world. Although the number of new patients in the mainland Child is restrained, the other countries are still struggling with the increasing number of new cases. I sincerely hope the situation will get better soon. At the same time, I am interested in how the spread of infectious diseases such as Covid-19 can happen. Is there anything we know about the mechanism of the spread disease?" />
+<link rel="canonical" href="https://www.lewuathe.com/covid-19-dynamics-with-sir-model.html" />
+<meta property="og:url" content="http://www.lewuathe.com/covid-19-dynamics-with-sir-model.html" />
+<meta property="og:site_name" content="The First Cry of Atom" />
+<meta property="og:image" content="http://www.lewuathe.com/assets/img/posts/2020-03-11-covid-19-dynamics-with-sir-model/catch.jpg" />
+<meta property="og:type" content="article" />
+<meta property="article:published_time" content="2020-03-11T08:41:46+00:00" />
+<script type="application/ld+json">
+{"datePublished":"2020-03-11T08:41:46+00:00","@type":"BlogPosting","mainEntityOfPage":{"@type":"WebPage","@id":"http://www.lewuathe.com/covid-19-dynamics-with-sir-model.html"},"url":"http://www.lewuathe.com/covid-19-dynamics-with-sir-model.html","author":{"@type":"Person","name":"Kai Sasaki"},"image":"http://www.lewuathe.com/assets/img/posts/2020-03-11-covid-19-dynamics-with-sir-model/catch.jpg","headline":"COVID-19 dynamics with SIR model","description":"The outbreak of the novel coronavirus disease (Covid-19) brought considerable turmoil all around the world. Although the number of new patients in the mainland Child is restrained, the other countries are still struggling with the increasing number of new cases. I sincerely hope the situation will get better soon. At the same time, I am interested in how the spread of infectious diseases such as Covid-19 can happen. Is there anything we know about the mechanism of the spread disease?","dateModified":"2020-03-11T08:41:46+00:00","@context":"https://schema.org"}</script>
+<!-- End Jekyll SEO tag -->
+
+
+  <!-- Google Adsense -->
+  <script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+  <script>
+  (adsbygoogle = window.adsbygoogle || []).push({
+    google_ad_client: "ca-pub-5103216174076760",
+    enable_page_level_ads: true
+  });
+  </script>
+
+<!-- Twitter card -->
+<meta name="twitter:card" content="summary" />
+
+</head>
+
+
+<body>
+  <!-- Google Tag Manager (noscript) -->
+  <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MXWPFC5"
+  height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
+  <!-- End Google Tag Manager (noscript) -->
+  <div class="container">
+    <header class="masthead">
+  <h3 class="masthead-title">
+    <a href="https://www.lewuathe.com/">The First Cry of Atom</a>
+    <small class="masthead-subtitle"></small>
+    <div class="menu">
+  <nav class="menu-content">
+    
+      <a href="https://www.lewuathe.com/menu/about.html">About</a>
+    
+      <a href="https://www.lewuathe.com/menu/writing.html">Writing</a>
+    
+      <a href="https://www.lewuathe.com/menu/contact.html">Contact</a>
+    
+  </nav>
+  <nav class="social-icons">
+    
+  
+  
+    <a href="https://www.github.com/Lewuathe" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="https://twitter.com/Lewuathe" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="https://www.linkedin.com/in/kaisasaki/" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="feed.xml" target="_blank"><i class="fa fa-rss-square" aria-hidden="true"></i></a>
+  
+
+  </nav>
+</div>
+
+  </h3>
+</header>
+
+
+    <div class="post-container">
+      <h1>
+  COVID-19 dynamics with SIR model
+</h1>
+
+
+  <img src="https://www.lewuathe.com/assets/img/posts/2020-03-11-covid-19-dynamics-with-sir-model/catch.jpg">
+
+
+<p>The outbreak of the <a href="https://www.who.int/emergencies/diseases/novel-coronavirus-2019">novel coronavirus disease (Covid-19)</a> brought considerable turmoil all around the world. Although the number of new patients in the mainland Child is restrained, the other countries are still struggling with the increasing number of new cases. I sincerely hope the situation will get better soon. At the same time, I am interested in how the spread of infectious diseases such as Covid-19 can happen. Is there anything we know about the mechanism of the spread disease?</p>
+
+<p>I have found there is a simple mathematical model named SIR model describing the structure of how the infectious disease. The assertion by the model is so interesting to me even it is simple to explain. This post aims to deliver an overview of the SIR model and the outcome of my simulation by using the dataset of Covid-19.</p>
+
+<p>Please refer to the repository used in this simulation for more detail.</p>
+
+<ul>
+  <li><a href="https://github.com/Lewuathe/COVID19-SIR">Lewuathe/COVID19-SIR</a></li>
+</ul>
+
+<div class="language-plaintext highlighter-rouge"><div class="highlight"><pre class="highlight"><code>- What is SIR model
+- Simulation with COVID-19 data
+- SIR Illustration
+- Wrap Up
+</code></pre></div></div>
+
+<h1 id="what-is-sir-model">What is SIR model</h1>
+
+<p>SIR model is a kind of compartmental model describing the dynamics of infectious disease. You may wonder why it is called the “compartmental model.” The model divides the population into compartments. Each compartment is expected to have the same characteristics. SIR represents the three compartments segmented by the model.</p>
+
+<ul>
+  <li><strong>S</strong>usceptible</li>
+  <li><strong>I</strong>nfectious</li>
+  <li><strong>R</strong>ecovered</li>
+</ul>
+
+<p><strong>Susceptible</strong> is a group of people who are vulnerable to exposure with infectious people. They can be patient when the infection happens. The group of <strong>infectious</strong> represents the infected people. They can pass the disease to susceptible people and can be recovered in a specific period. <strong>Recovered</strong> people get immunity so that they are not susceptible to the same illness anymore. SIR model is a framework describing how the number of people in each group can change over time.</p>
+
+<p><img src="assets/img/posts/2020-03-11-covid-19-dynamics-with-sir-model/sir.png" alt="SIR" /></p>
+
+<p>SIR model allows us to describe the number of people in each compartment with the ordinary differential equation. <script type="math/tex">\beta</script> is a parameter controlling how much the disease can be transmitted through exposure. It is determined by the chance of contact and the probability of disease transmission. <script type="math/tex">\gamma</script> is a parameter expressing how much the disease can be recovered in a specific period. Once the people are healed, they get immunity. There is no chance for them to go back susceptible again.</p>
+
+<p><img src="assets/img/posts/2020-03-11-covid-19-dynamics-with-sir-model/ode.png" alt="ODE" /></p>
+
+<p>We do not consider the effect of the natural death or birth rate because the model assumes the outstanding period of the disease is much shorter than the lifetime of the human. It lets us know the importance of knowing two parameters, <script type="math/tex">\beta</script> and <script type="math/tex">\gamma</script>. When we can estimate the two values, there are several insights derived from it. If the <script type="math/tex">D</script> is the average days to recover from infectious, it is derived from <script type="math/tex">\gamma</script>.</p>
+
+<p>\begin{equation}
+D = \frac{1}{\gamma}
+\end{equation}</p>
+
+<p>Also, we can estimate the nature of the disease in terms of the power of infection.</p>
+
+<p>\begin{equation}
+R_0 = \frac{\beta}{\gamma}
+\end{equation}</p>
+
+<p>It is called a <a href="https://en.wikipedia.org/wiki/Basic_reproduction_number"><strong>basic reproduction number</strong></a>. <script type="math/tex">R_0</script> is the average number of people infected from one other person. If it is high, the probability of pandemic is also higher. The number is also used to estimate the herd immune threshold (HIT). If the basic reproduction number multiplied by the percentage of non-immune people (susceptible) is equal to 1, it indicates the balanced state. The number of infectious people is constant. Assume the proportion of immune people is <script type="math/tex">p</script>, the stable state can be formulated as follows.</p>
+
+<p>\begin{equation}
+R_0 (1 - p) = 1 \rightarrow <br />
+1 - p = \frac{1}{R_0} \rightarrow <br />
+p_c = 1 - \frac{1}{R_0}
+\end{equation}</p>
+
+<p>Therefore, <script type="math/tex">p_c</script> is the HIT to stop the spread of the infectious disease. We can stop the outbreak by vaccinating the population to increase herd immunity.</p>
+
+<p>The video provided by 3Blue1Brown is also a great resource to learn the SIR model visually.</p>
+
+<iframe width="560" height="315" src="https://www.youtube.com/embed/gxAaO2rsdIs" frameborder="0" allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture" allowfullscreen=""></iframe>
+
+<p>We have got the basics of the SIR model and what each metric means in terms of the dynamics of the spread of the infectious disease. Now it’s time to apply the model to COVID-19 case.</p>
+
+<h1 id="simulation-with-covid-19-data">Simulation with COVID-19 data</h1>
+
+<p>The data source I have used in this experiment is available in <a href="https://data.humdata.org/dataset/novel-coronavirus-2019-ncov-cases">HDX</a>. We can download the number of cases which is:</p>
+
+<ul>
+  <li><a href="https://data.humdata.org/hxlproxy/api/data-preview.csv?url=https%3A%2F%2Fraw.githubusercontent.com%2FCSSEGISandData%2FCOVID-19%2Fmaster%2Fcsse_covid_19_data%2Fcsse_covid_19_time_series%2Ftime_series_19-covid-Confirmed.csv">Confirmed</a></li>
+  <li><a href="https://data.humdata.org/hxlproxy/api/data-preview.csv?url=https%3A%2F%2Fraw.githubusercontent.com%2FCSSEGISandData%2FCOVID-19%2Fmaster%2Fcsse_covid_19_data%2Fcsse_covid_19_time_series%2Ftime_series_19-covid-Deaths.csv">Deaths</a></li>
+  <li><a href="https://data.humdata.org/hxlproxy/api/data-preview.csv?url=https%3A%2F%2Fraw.githubusercontent.com%2FCSSEGISandData%2FCOVID-19%2Fmaster%2Fcsse_covid_19_data%2Fcsse_covid_19_time_series%2Ftime_series_19-covid-Recovered.csv">Recovered</a></li>
+</ul>
+
+<p>What we are going to do is estimate the <script type="math/tex">\beta</script> and <script type="math/tex">\gamma</script> to fit the SIR model with the actual confirmed cases (the number of infectious people). To solve the ordinary differential equation like the SIR model, we can use <a href="https://docs.scipy.org/doc/scipy/reference/generated/scipy.integrate.solve_ivp.html">solve_ivp</a> function in scipy module.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="n">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="n">pd</span>
+<span class="kn">from</span> <span class="nn">scipy.integrate</span> <span class="kn">import</span> <span class="n">solve_ivp</span>
+<span class="kn">from</span> <span class="nn">scipy.optimize</span> <span class="kn">import</span> <span class="n">minimize</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">timedelta</span><span class="p">,</span> <span class="n">datetime</span>
+
+<span class="n">START_DATE</span> <span class="o">=</span> <span class="p">{</span>
+  <span class="s">'Japan'</span><span class="p">:</span> <span class="s">'1/22/20'</span><span class="p">,</span>
+  <span class="s">'Italy'</span><span class="p">:</span> <span class="s">'1/31/20'</span><span class="p">,</span>
+  <span class="s">'Republic of Korea'</span><span class="p">:</span> <span class="s">'1/22/20'</span><span class="p">,</span>
+  <span class="s">'Iran (Islamic Republic of)'</span><span class="p">:</span> <span class="s">'2/19/20'</span>
+<span class="p">}</span>
+
+<span class="k">class</span> <span class="nc">Learner</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">country</span><span class="p">,</span> <span class="n">loss</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">country</span> <span class="o">=</span> <span class="n">country</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loss</span> <span class="o">=</span> <span class="n">loss</span>
+
+    <span class="k">def</span> <span class="nf">load_confirmed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">country</span><span class="p">):</span>
+      <span class="s">"""
+      Load confirmed cases downloaded from HDX
+      """</span>
+      <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s">'data/time_series_19-covid-Confirmed.csv'</span><span class="p">)</span>
+      <span class="n">country_df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="s">'Country/Region'</span><span class="p">]</span> <span class="o">==</span> <span class="n">country</span><span class="p">]</span>
+      <span class="k">return</span> <span class="n">country_df</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">START_DATE</span><span class="p">[</span><span class="n">country</span><span class="p">]:]</span>
+
+    <span class="k">def</span> <span class="nf">extend_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">new_size</span><span class="p">):</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="n">index</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">current</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strptime</span><span class="p">(</span><span class="n">index</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="s">'</span><span class="si">%</span><span class="s">m/</span><span class="si">%</span><span class="s">d/</span><span class="si">%</span><span class="s">y'</span><span class="p">)</span>
+        <span class="k">while</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">new_size</span><span class="p">:</span>
+            <span class="n">current</span> <span class="o">=</span> <span class="n">current</span> <span class="o">+</span> <span class="n">timedelta</span><span class="p">(</span><span class="n">days</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="s">'</span><span class="si">%</span><span class="s">m/</span><span class="si">%</span><span class="s">d/</span><span class="si">%</span><span class="s">y'</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">values</span>
+
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">beta</span><span class="p">,</span> <span class="n">gamma</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+        <span class="s">"""
+        Predict how the number of people in each compartment can be changed through time toward the future.
+        The model is formulated with the given beta and gamma.
+        """</span>
+        <span class="n">predict_range</span> <span class="o">=</span> <span class="mi">150</span>
+        <span class="n">new_index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">extend_index</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">predict_range</span><span class="p">)</span>
+        <span class="n">size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">new_index</span><span class="p">)</span>
+        <span class="k">def</span> <span class="nf">SIR</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+            <span class="n">S</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">I</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">R</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+            <span class="k">return</span> <span class="p">[</span><span class="o">-</span><span class="n">beta</span><span class="o">*</span><span class="n">S</span><span class="o">*</span><span class="n">I</span><span class="p">,</span> <span class="n">beta</span><span class="o">*</span><span class="n">S</span><span class="o">*</span><span class="n">I</span><span class="o">-</span><span class="n">gamma</span><span class="o">*</span><span class="n">I</span><span class="p">,</span> <span class="n">gamma</span><span class="o">*</span><span class="n">I</span><span class="p">]</span>
+        <span class="n">extended_actual</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="p">[</span><span class="bp">None</span><span class="p">]</span> <span class="o">*</span> <span class="p">(</span><span class="n">size</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">values</span><span class="p">))))</span>
+        <span class="k">return</span> <span class="n">new_index</span><span class="p">,</span> <span class="n">extended_actual</span><span class="p">,</span> <span class="n">solve_ivp</span><span class="p">(</span><span class="n">SIR</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">size</span><span class="p">],</span> <span class="p">[</span><span class="n">S_0</span><span class="p">,</span><span class="n">I_0</span><span class="p">,</span><span class="n">R_0</span><span class="p">],</span> <span class="n">t_eval</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">train</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="s">"""
+        Run the optimization to estimate the beta and gamma fitting the given confirmed cases.
+        """</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">load_confirmed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">country</span><span class="p">)</span>
+        <span class="n">optimal</span> <span class="o">=</span> <span class="n">minimize</span><span class="p">(</span>
+            <span class="n">loss</span><span class="p">,</span>
+            <span class="p">[</span><span class="mf">0.001</span><span class="p">,</span> <span class="mf">0.001</span><span class="p">],</span>
+            <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
+            <span class="n">method</span><span class="o">=</span><span class="s">'L-BFGS-B'</span><span class="p">,</span>
+            <span class="n">bounds</span><span class="o">=</span><span class="p">[(</span><span class="mf">0.00000001</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">),</span> <span class="p">(</span><span class="mf">0.00000001</span><span class="p">,</span> <span class="mf">0.4</span><span class="p">)]</span>
+        <span class="p">)</span>
+        <span class="n">beta</span><span class="p">,</span> <span class="n">gamma</span> <span class="o">=</span> <span class="n">optimal</span><span class="o">.</span><span class="n">x</span>
+        <span class="n">new_index</span><span class="p">,</span> <span class="n">extended_actual</span><span class="p">,</span> <span class="n">prediction</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">beta</span><span class="p">,</span> <span class="n">gamma</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+            <span class="s">'Actual'</span><span class="p">:</span> <span class="n">extended_actual</span><span class="p">,</span>
+            <span class="s">'S'</span><span class="p">:</span> <span class="n">prediction</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="s">'I'</span><span class="p">:</span> <span class="n">prediction</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span>
+            <span class="s">'R'</span><span class="p">:</span> <span class="n">prediction</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="p">},</span> <span class="n">index</span><span class="o">=</span><span class="n">new_index</span><span class="p">)</span>
+        <span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">15</span><span class="p">,</span> <span class="mi">10</span><span class="p">))</span>
+        <span class="n">ax</span><span class="o">.</span><span class="n">set_title</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">country</span><span class="p">)</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">ax</span><span class="o">=</span><span class="n">ax</span><span class="p">)</span>
+        <span class="n">fig</span><span class="o">.</span><span class="n">savefig</span><span class="p">(</span><span class="n">f</span><span class="s">"{self.country}.png"</span><span class="p">)</span>
+</code></pre></div></div>
+
+<p>The loss function used in the optimization process was <a href="https://en.wikipedia.org/wiki/Root-mean-square_deviation">the root mean squared error (RMSE)</a>.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">loss</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+    <span class="s">"""
+    RMSE between actual confirmed cases and the estimated infectious people with given beta and gamma.
+    """</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">beta</span><span class="p">,</span> <span class="n">gamma</span> <span class="o">=</span> <span class="n">point</span>
+    <span class="k">def</span> <span class="nf">SIR</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="n">S</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">I</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">[</span><span class="o">-</span><span class="n">beta</span><span class="o">*</span><span class="n">S</span><span class="o">*</span><span class="n">I</span><span class="p">,</span> <span class="n">beta</span><span class="o">*</span><span class="n">S</span><span class="o">*</span><span class="n">I</span><span class="o">-</span><span class="n">gamma</span><span class="o">*</span><span class="n">I</span><span class="p">,</span> <span class="n">gamma</span><span class="o">*</span><span class="n">I</span><span class="p">]</span>
+    <span class="n">solution</span> <span class="o">=</span> <span class="n">solve_ivp</span><span class="p">(</span><span class="n">SIR</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">size</span><span class="p">],</span> <span class="p">[</span><span class="n">S_0</span><span class="p">,</span><span class="n">I_0</span><span class="p">,</span><span class="n">R_0</span><span class="p">],</span> <span class="n">t_eval</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">vectorized</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">((</span><span class="n">solution</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+</code></pre></div></div>
+
+<p>How can we decide the initial values of compartments? SIR model expects the susceptible to be homogenous, well-mixed, and accessible to each other. Setting the whole population in the country is not realistic for sure. I roughly infer the number of susceptible people in the compartment 15000. The number was determined by the rough inference of the max quantity of susceptible people except for mainland China. And also, it’s determined by the computational capacity. (Over 1 million susceptible people did not allow me to complete the calculation in a short time). The initial infectious people were 2 for every country, although the start of the outbreak is different.</p>
+
+<h1 id="sir-simulation">SIR Simulation</h1>
+
+<p>I have run the estimation process for four countries.</p>
+
+<ul>
+  <li>Japan</li>
+  <li>South Korea</li>
+  <li>Italy</li>
+  <li>Iran</li>
+</ul>
+
+<p>They are the major countries suffering from the CODIV-19 outbreak. The following images illustrate how the number of the compartment can be changed over time, according to the SIR model.</p>
+
+<p><img src="assets/img/posts/2020-03-11-covid-19-dynamics-with-sir-model/japan.png" alt="Japan" />
+<img src="assets/img/posts/2020-03-11-covid-19-dynamics-with-sir-model/south_korea.png" alt="South Korea" />
+<img src="assets/img/posts/2020-03-11-covid-19-dynamics-with-sir-model/italy.png" alt="Italy" />
+<img src="assets/img/posts/2020-03-11-covid-19-dynamics-with-sir-model/iran.png" alt="Iran" /></p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left">Country</th>
+      <th style="text-align: left"><script type="math/tex">\beta</script></th>
+      <th style="text-align: left"><script type="math/tex">\gamma</script></th>
+      <th style="text-align: left"><script type="math/tex">R_0</script></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left">Japan</td>
+      <td style="text-align: left">0.00002856</td>
+      <td style="text-align: left">0.29819303</td>
+      <td style="text-align: left">0.00009578</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">South Korea</td>
+      <td style="text-align: left">0.00001297</td>
+      <td style="text-align: left">0.00000001</td>
+      <td style="text-align: left">1297.49430758</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Italy</td>
+      <td style="text-align: left">0.00001582</td>
+      <td style="text-align: left">0.00000001</td>
+      <td style="text-align: left">1581.92377423</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Iran</td>
+      <td style="text-align: left">0.00006294</td>
+      <td style="text-align: left">0.39999237</td>
+      <td style="text-align: left">0.00015735</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Hmm, with this parameter, the model is well-fitting to Japanese case but not suitable for other countries. We may need to adjust the initial setting by countries or take into account the number of recovered people. Let’s modify the loss function to consider the recovered people too. The data is also available in HDX.</p>
+
+<div class="language-python highlighter-rouge"><div class="highlight"><pre class="highlight"><code><span class="k">def</span> <span class="nf">loss</span><span class="p">(</span><span class="n">point</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">recovered</span><span class="p">):</span>
+    <span class="n">size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+    <span class="n">beta</span><span class="p">,</span> <span class="n">gamma</span> <span class="o">=</span> <span class="n">point</span>
+    <span class="k">def</span> <span class="nf">SIR</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
+        <span class="n">S</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">I</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">R</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">return</span> <span class="p">[</span><span class="o">-</span><span class="n">beta</span><span class="o">*</span><span class="n">S</span><span class="o">*</span><span class="n">I</span><span class="p">,</span> <span class="n">beta</span><span class="o">*</span><span class="n">S</span><span class="o">*</span><span class="n">I</span><span class="o">-</span><span class="n">gamma</span><span class="o">*</span><span class="n">I</span><span class="p">,</span> <span class="n">gamma</span><span class="o">*</span><span class="n">I</span><span class="p">]</span>
+    <span class="n">solution</span> <span class="o">=</span> <span class="n">solve_ivp</span><span class="p">(</span><span class="n">SIR</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="n">size</span><span class="p">],</span> <span class="p">[</span><span class="n">S_0</span><span class="p">,</span><span class="n">I_0</span><span class="p">,</span><span class="n">R_0</span><span class="p">],</span> <span class="n">t_eval</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">size</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span> <span class="n">vectorized</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+    <span class="n">l1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">((</span><span class="n">solution</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">data</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+    <span class="n">l2</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">((</span><span class="n">solution</span><span class="o">.</span><span class="n">y</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">-</span> <span class="n">recovered</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+    <span class="c1"># Put more emphasis on recovered people
+</span>    <span class="n">alpha</span> <span class="o">=</span> <span class="mf">0.1</span>
+    <span class="k">return</span> <span class="n">alpha</span> <span class="o">*</span> <span class="n">l1</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="o">-</span> <span class="n">alpha</span><span class="p">)</span> <span class="o">*</span> <span class="n">l2</span>
+</code></pre></div></div>
+
+<p>Here is the result, including the recovered people.</p>
+
+<p><img src="assets/img/posts/2020-03-11-covid-19-dynamics-with-sir-model/japan_2.png" alt="Japan" />
+<img src="assets/img/posts/2020-03-11-covid-19-dynamics-with-sir-model/south_korea_2.png" alt="South Korea" />
+<img src="assets/img/posts/2020-03-11-covid-19-dynamics-with-sir-model/italy_2.png" alt="Italy" />
+<img src="assets/img/posts/2020-03-11-covid-19-dynamics-with-sir-model/iran_2.png" alt="Iran" /></p>
+
+<table>
+  <thead>
+    <tr>
+      <th style="text-align: left">Country</th>
+      <th style="text-align: left"><script type="math/tex">\beta</script></th>
+      <th style="text-align: left"><script type="math/tex">\gamma</script></th>
+      <th style="text-align: left"><script type="math/tex">R_0</script></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td style="text-align: left">Japan</td>
+      <td style="text-align: left">0.00000927</td>
+      <td style="text-align: left">0.01837935</td>
+      <td style="text-align: left">0.00050458</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">South Korea</td>
+      <td style="text-align: left">0.00001298</td>
+      <td style="text-align: left">0.00000001</td>
+      <td style="text-align: left">1297.76738269</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Italy</td>
+      <td style="text-align: left">0.00001713</td>
+      <td style="text-align: left">0.01414756</td>
+      <td style="text-align: left">0.00121065</td>
+    </tr>
+    <tr>
+      <td style="text-align: left">Iran</td>
+      <td style="text-align: left">0.00003974</td>
+      <td style="text-align: left">0.08023309</td>
+      <td style="text-align: left">0.00049526</td>
+    </tr>
+  </tbody>
+</table>
+
+<p>Now the SIR model is well-fitting the actual data for both confirmed and recovered cases. The <script type="math/tex">R_0</script> of South Korea is significantly higher than in other countries. That might be caused by the relatively lower rate of recovery of the country. Based on the result, the <script type="math/tex">R_0</script> is pretty lower than it should be. It will be roughly 2-5 (SARS) according to <a href="https://en.wikipedia.org/wiki/Herd_immunity#Mechanism">the statistics of the past infectious diseases</a> if the calculation is correct. Probably, the assumption of the initial values can be wrong or fail to find the global minimum in the optimization process.</p>
+
+<h1 id="wrap-up">Wrap Up</h1>
+
+<p>Anyway, one important thing here is that <strong>it’s not the official one</strong>. Not surprisingly, it can be wrong. This experiment is done for satisfying my interest in the SIR model fitting to the COVID-19 dataset to see the dynamics of the spread of new disease-causing the widespread pandemic. I would be glad if this article is helpful for those who are also interested in the mechanism of the spread of infectious disease in general.</p>
+
+<p>Last but not least, please be sure to wash your hand regularly and keep away from the crowded area as general guidance says. I hope the outbreak will be over soon.</p>
+
+<p>The full code used in this simulation is available in GitHub.</p>
+
+<ul>
+  <li><a href="https://github.com/Lewuathe/COVID19-SIR">Lewuathe/COVID19-SIR</a></li>
+</ul>
+
+<h1 id="references">References</h1>
+
+<ul>
+  <li><a href="https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology">Compartmental models in epidemiology</a></li>
+  <li><a href="https://data.humdata.org/dataset/novel-coronavirus-2019-ncov-cases">Novel Coronavirus (COVID-19) Cases</a></li>
+  <li><a href="https://www.who.int/emergencies/diseases/novel-coronavirus-2019/">COVID-19 from WHO</a></li>
+  <li><a href="https://github.com/Lewuathe/COVID19-SIR">Lewuathe/COVID19-SIR</a></li>
+</ul>
+
+<p>Image by <a href="https://pixabay.com/users/geralt-9301/?utm_source=link-attribution&amp;utm_medium=referral&amp;utm_campaign=image&amp;utm_content=4030721">Gerd Altmann</a> from <a href="https://pixabay.com/?utm_source=link-attribution&amp;utm_medium=referral&amp;utm_campaign=image&amp;utm_content=4030721">Pixabay</a></p>
+
+
+<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+<ins class="adsbygoogle"
+     style="display:block; text-align:center;"
+     data-ad-layout="in-article"
+     data-ad-format="fluid"
+     data-ad-client="ca-pub-5103216174076760"
+     data-ad-slot="8593984742"></ins>
+<script>
+     (adsbygoogle = window.adsbygoogle || []).push({});
+</script>
+
+<span class="post-date">
+  Written on
+  
+  March
+  11th,
+  2020
+  by
+  
+    Kai Sasaki
+  
+</span>
+
+<div class="post-date">Feel free to share!</div>
+  <div class="sharing-icons">
+    <a href="https://twitter.com/intent/tweet?text=COVID-19 dynamics with SIR model&amp;url=http://www.lewuathe.com/covid-19-dynamics-with-sir-model.html" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+    <a href="https://www.facebook.com/sharer/sharer.php?u=http://www.lewuathe.com/covid-19-dynamics-with-sir-model.html&amp;title=COVID-19 dynamics with SIR model" target="_blank"><i class="fa fa-facebook" aria-hidden="true"></i></a>
+  </div>
+</div>
+
+
+<div class="related">
+  <h1 >You may also enjoy:</h1>
+  
+  <ul class="related-posts">
+    
+      
+        
+        
+      
+        
+          <li>
+            <h3>
+              <div style="padding: 0.5em 1em;
+              margin: 2em 0;
+              color: #5d627b;
+              background: white;
+              box-shadow: 0 1px 5px rgba(0, 0, 0, 0.22);">
+              <a href="https://www.lewuathe.com/omaha-lightweight-financial-data-collection-module.html">
+                
+                <img height="170" width="250" alt="-" src="https://www.lewuathe.com/assets/img/posts/2020-01-31-omaha:-lightweight-financial-data-collection-module/catch.jpg">
+                
+                <br>
+                Omaha: Unified view of financial metrics of public companies                  
+                <!-- <i><font size="2">/omaha-lightweight-financial-data-collection-module.html</font></i> -->
+                <br>                
+         <small>January 31, 2020</small>                 
+              </a>
+              </div>
+            </h3>
+          </li>
+          
+        
+      
+        
+          <li>
+            <h3>
+              <div style="padding: 0.5em 1em;
+              margin: 2em 0;
+              color: #5d627b;
+              background: white;
+              box-shadow: 0 1px 5px rgba(0, 0, 0, 0.22);">
+              <a href="https://www.lewuathe.com/radix-sort-in-python.html">
+                
+                <br>
+                Radix Sort in Python                  
+                <!-- <i><font size="2">/radix-sort-in-python.html</font></i> -->
+                <br>                
+         <small>November 19, 2017</small>                 
+              </a>
+              </div>
+            </h3>
+          </li>
+          
+        
+      
+    
+      
+        
+          <li>
+            <h3>
+              <div style="padding: 0.5em 1em;
+              margin: 2em 0;
+              color: #5d627b;
+              background: white;
+              box-shadow: 0 1px 5px rgba(0, 0, 0, 0.22);">
+              <a href="https://www.lewuathe.com/open-dataset-for-covid-19.html">
+                
+                <img height="170" width="250" alt="-" src="https://www.lewuathe.com/assets/img/posts/2020-03-18-open-dataset-for-covid-19/catch.jpg">
+                
+                <br>
+                Open Dataset for COVID-19                  
+                <!-- <i><font size="2">/open-dataset-for-covid-19.html</font></i> -->
+                <br>                
+         <small>March 18, 2020</small>                 
+              </a>
+              </div>
+            </h3>
+          </li>
+          
+        
+      
+        
+        
+      
+        
+          <li>
+            <h3>
+              <div style="padding: 0.5em 1em;
+              margin: 2em 0;
+              color: #5d627b;
+              background: white;
+              box-shadow: 0 1px 5px rgba(0, 0, 0, 0.22);">
+              <a href="https://www.lewuathe.com/youtube-to-learn-science.html">
+                
+                <img height="170" width="250" alt="-" src="https://www.lewuathe.com/assets/img/posts/2019-08-11-youtube-to-learn-science/catch.jpg">
+                
+                <br>
+                YouTube to Learn Science                  
+                <!-- <i><font size="2">/youtube-to-learn-science.html</font></i> -->
+                <br>                
+         <small>August 11, 2019</small>                 
+              </a>
+              </div>
+            </h3>
+          </li>
+          
+        
+      
+    
+      
+        
+          <li>
+            <h3>
+              <div style="padding: 0.5em 1em;
+              margin: 2em 0;
+              color: #5d627b;
+              background: white;
+              box-shadow: 0 1px 5px rgba(0, 0, 0, 0.22);">
+              <a href="https://www.lewuathe.com/visualize-covid-19-situation-in-japan.html">
+                
+                <img height="170" width="250" alt="-" src="https://www.lewuathe.com/assets/img/posts/2020-03-21-visualize-covid-19-situation-in-japan/catch.png">
+                
+                <br>
+                Visualize COVID-19 situation in Japan                  
+                <!-- <i><font size="2">/visualize-covid-19-situation-in-japan.html</font></i> -->
+                <br>                
+         <small>March 21, 2020</small>                 
+              </a>
+              </div>
+            </h3>
+          </li>
+          
+        
+      
+        
+        
+      
+        
+        
+      
+    
+  </ul>
+</div>
+
+
+
+
+    </div>
+
+    <footer class="footer">
+  
+  
+  
+    <a href="https://www.github.com/Lewuathe" target="_blank"><i class="fa fa-github" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="https://twitter.com/Lewuathe" target="_blank"><i class="fa fa-twitter" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="https://www.linkedin.com/in/kaisasaki/" target="_blank"><i class="fa fa-linkedin" aria-hidden="true"></i></a>
+  
+
+  
+  
+    <a href="feed.xml" target="_blank"><i class="fa fa-rss-square" aria-hidden="true"></i></a>
+  
+
+  <div class="post-date"><a href="https://www.lewuathe.com/menu/about.html">The First Cry of Atom |  by Kai Sasaki</a></div>
+  <div class="post-date">© Copyright 2020 <a href="https://www.lewuathe.com/menu/about.html">Kai Sasaki</a> All Rights Reserved</div>
+</footer>
+
+  </div>
+
+</body>
+</html>
