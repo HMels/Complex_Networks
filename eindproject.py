@@ -114,6 +114,7 @@ gamma = 0.0002
 Infections = np.zeros([tmax,Nnodes])
 Removed = np.zeros([Nnodes, Nnodes])
 Removed_total = np.zeros([tmax,Nnodes])
+Susceptible = np.zeros([tmax,Nnodes])
 
 Aoud = np.eye(Nnodes)
 unit = np.eye(Nnodes)
@@ -151,7 +152,7 @@ for i in range(0,tmax):
 #                Aoud[l,k] = 0          
     Removed_total[i,:] = np.sum(Removed, axis=0)      
     Infections[i,:] = np.sum(Aoud, axis=0)
-
+    Susceptible[i,:] = Nnodes - Removed_total[i,:] - Infections[i,:]
 stop = timeit.default_timer()
 print('Time:',stop-start)
 
@@ -175,8 +176,16 @@ StandardDev_rem = np.std(Removed_total, axis = 1)
 #plt.title('Average Infected Nodes Versus Time With Corresponding Standard Deviation')
 plt.errorbar(t/6/24,Nnodes - ExpVal_rem,yerr = StandardDev_rem, errorevery = 452, ecolor = 'y', color = 'b')
 
+#%%
+plt.close("all")
+ExpVal_inf = np.sum(Infections, axis = 1)/Nnodes
+ExpVal_sus = np.sum(Susceptible, axis = 1)/Nnodes
+ExpVal_rem = np.sum(Removed_total, axis = 1)/Nnodes
 
-
+t=np.linspace(1,tmax,len(ExpVal_inf))
+plt.plot(t/6/24,ExpVal_inf, 'k')
+plt.plot(t/6/24,ExpVal_sus, 'b')
+plt.plot(t/6/24,ExpVal_rem, 'r')
 
 
 
