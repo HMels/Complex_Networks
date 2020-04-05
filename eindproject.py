@@ -5,32 +5,38 @@ import igraph as igraph
 import matplotlib.pyplot as plt
 from IPython.display import clear_output, display
 
+import numpy.random as rnd
+import timeit
 
 #data = pd.read_excel (r'C:\Users\Thierry\Documents\Studie\TU Delft Applied Physics\CS4195 Modeling and Data Analysis in Complex Networks\Assignment1\manufacturing_emails_temporal_network.xlsx')
 B = pd.read_excel (r'C:\Users\rixtb\Documents\Master\Data analysis\Datasets\MIT_data_sorted.xlsx')
 #data = pd.read_excel (r'C:\Users\rixtb\Documents\Master\Data analysis\Datasets\oefenset.xlsx')
 #data = data.drop_duplicates()
 
-#%% 
 data = B
 Nnodes = np.max([data['node1'].max(), data['node2'].max()])
 Nlinks = len(data)
 Tmin = np.max([data['timestamp'].min()])
 data['timestamp'] = ( data['timestamp'] - Tmin) /600         #first timestamp is 0, every timestep is 10 minutes
+
+#%% Make iGraph
 g = igraph.Graph()
 g.add_vertices(Nnodes)
 col1 = data['node1']; col2 = data['node2']; col3 = data['timestamp']
 col1 = col1.tolist(); col2 = col2.tolist(); col3 = col3.tolist()
-col1 = col1[:int(Nlinks/3)]; col2 = col2[:int(Nlinks/3)]; col3 =col3[:int(Nlinks/3)]
+col1 = col1[:int(Nlinks/3)]; col2 = col2[:int(Nlinks/3)]; col3 = col3[:int(Nlinks/3)]
 #%%
 Nlinks = len(col1)
+iets=0.001
 
 for i in range(Nlinks):
     
     g.add_edges([(col1[i]-1,col2[i]-1)])
-#    a = [ str(np.round(i/Nlinks*100,2)) + ' % ']
-#    clear_output(wait=True)
-#    display(a)
+    p = rnd.rand()
+    if p<iets: 
+        a = [ str(np.round(i/Nlinks*100,2)) + ' % ']
+        clear_output(wait=True)
+        display(a)
 #%% Properties temporal network
 ED = g.degree()
 p = g.density(loops=False) #ratio between the actual links and the possible edges
@@ -42,6 +48,17 @@ pd = g.assortativity_degree()
 clust_coef = g.transitivity_undirected()
 average_path_length=g.average_path_length()
 hopcount_max = np.max(g.shortest_paths())
+#%%
+Adj = g.get_adjacency()
+Adj = np.array([Adj.data])
+Eig = np.linalg.eig(Adj)
+MaxEig = np.max(Eig[0])
+
+Lap = g.laplacian()
+Lap = np.array([Lap])
+Eiglap = np.linalg.eig(Lap) #stores eigenvalues and eigenvectors
+Alg_con = np.sort(Eiglap[0])
+Alg_con = Alg_con[:,1] #take second smallest eigenvalue
 
 #%% Calculate temporal network
 data_ag = B
@@ -91,36 +108,50 @@ Alg_con_ag = Alg_con_ag[:,1] #take second smallest eigenvalue
 
 #%% Infection of network using adjancency matrix
 
-import numpy.random as rnd
-import timeit
-#%%
 tmax = int(data.timestamp.max())
 beta = 0.2
-gamma = 
+gamma = 0.0002
 Infections = np.zeros([tmax,Nnodes])
-
-start = timeit.default_timer()
+Removed = np.zeros([Nnodes, Nnodes])
+Removed_total = np.zeros([tmax,Nnodes])
 
 Aoud = np.eye(Nnodes)
 unit = np.eye(Nnodes)
+start = timeit.default_timer()
 
 for i in range(0,tmax):
     data_temp = data[data.timestamp==i].values
     A = np.zeros([Nnodes,Nnodes])
     w = int(len(data_temp))
-    
-    
+ 
     for j in range(w):
         p = rnd.rand()
         if p<beta:    # When p is smaller than beta, (0.11<0.2) then the contact will be counted as an infection, if not, no infection so no changes in infection matrix
             A[int(data_temp[j,0]-1),int(data_temp[j,1]-1)] = 1
             A[int(data_temp[j,1]-1),int(data_temp[j,0]-1)] = 1
-    
-    Inf = np.dot(A+unit,Aoud)
+      
+    Inf = np.dot(A+unit,Aoud) #infectable content
     Inf[Inf>0]=1
-    Aoud = Inf
-    Infections[i-1,:] = np.sum(Inf, axis=0)
-        
+    Aoud = Inf - Removed #current infected nodes
+    Aoud[Aoud<0]=0
+    if True:
+        locate = np.argwhere(Aoud>0) #search for infected nodes
+    
+        for l in locate: #removed nodes, probability to recover is gamma
+            q = rnd.rand()
+            if q<gamma:
+                Aoud[l[0],l[1]] = 0
+                Removed[l[0],l[1]] = 1 #Stores which nodes are immune
+            
+#            for l in range(len(Aoud[0,:])):
+#        for k in range(len(Aoud[:,0])):
+#            q = rnd.rand()
+#            if q<gamma:
+#                Removed[l,k] = Aoud[l,k]
+#                Aoud[l,k] = 0          
+    Removed_total[i,:] = np.sum(Removed, axis=0)      
+    Infections[i,:] = np.sum(Aoud, axis=0)
+
 stop = timeit.default_timer()
 print('Time:',stop-start)
 
@@ -132,14 +163,17 @@ ExpVal = np.sum(Infections, axis = 1)/Nnodes
 StandardDev = np.std(Infections, axis = 1)
 
 t=np.linspace(1,tmax,len(ExpVal))
-plt.axes(xlim=(1,tmax))
-plt.xlabel('Time(s)')
+plt.axes(xlim=(0,tmax/6/24))
+plt.xlabel('Time(days)')
 plt.ylabel('Average Infected Nodes')
 #plt.title('Average Infected Nodes Versus Time With Corresponding Standard Deviation')
-plt.errorbar(t,ExpVal,yerr = StandardDev, errorevery = 100, ecolor = 'r', color = 'k')
+plt.errorbar(t/6/24,ExpVal,yerr = StandardDev, errorevery = 400, ecolor = 'r', color = 'k')
 
+ExpVal_rem = np.sum(Removed_total, axis = 1)/Nnodes
+StandardDev_rem = np.std(Removed_total, axis = 1)
 
-
+#plt.title('Average Infected Nodes Versus Time With Corresponding Standard Deviation')
+plt.errorbar(t/6/24,Nnodes - ExpVal_rem,yerr = StandardDev_rem, errorevery = 452, ecolor = 'y', color = 'b')
 
 
 
