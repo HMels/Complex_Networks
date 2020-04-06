@@ -4,6 +4,7 @@ import pandas as pd
 import igraph as igraph
 import matplotlib.pyplot as plt
 from IPython.display import clear_output, display
+import random
 
 import numpy.random as rnd
 import timeit
@@ -116,9 +117,11 @@ Removed = np.zeros([Nnodes, Nnodes])
 Removed_total = np.zeros([tmax,Nnodes])
 Susceptible = np.zeros([tmax,Nnodes])
 
-n_removed = 100
-delete_row = rnd.randint(len(data)+1,size=n_removed)
+n_removed = round(len(data)*0.995)
+delete_row = random.sample(range(len(data)),n_removed)
+data_dropped = data
 data_dropped = data.drop(delete_row)
+#delete_row.index(1048575)
 
 
 Aoud = np.eye(Nnodes)
