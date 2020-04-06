@@ -9,7 +9,7 @@ import numpy.random as rnd
 import timeit
 
 #data = pd.read_excel (r'C:\Users\Thierry\Documents\Studie\TU Delft Applied Physics\CS4195 Modeling and Data Analysis in Complex Networks\Assignment1\manufacturing_emails_temporal_network.xlsx')
-B = pd.read_excel (r'C:\Users\rixtb\Documents\Master\Data analysis\Datasets\MIT_data_sorted.xlsx')
+B = pd.read_excel (r'MIT_data_sorted.xlsx')
 #data = pd.read_excel (r'C:\Users\rixtb\Documents\Master\Data analysis\Datasets\oefenset.xlsx')
 #data = data.drop_duplicates()
 
@@ -116,12 +116,18 @@ Removed = np.zeros([Nnodes, Nnodes])
 Removed_total = np.zeros([tmax,Nnodes])
 Susceptible = np.zeros([tmax,Nnodes])
 
+n_removed = 100
+delete_row = rnd.randint(len(data)+1,size=n_removed)
+data_dropped = data.drop(delete_row)
+
+
 Aoud = np.eye(Nnodes)
 unit = np.eye(Nnodes)
 start = timeit.default_timer()
 
 for i in range(0,tmax):
-    data_temp = data[data.timestamp==i].values
+    #data_temp = data[data.timestamp==i].values
+    data_temp = data_dropped[data_dropped.timestamp==i].values
     A = np.zeros([Nnodes,Nnodes])
     w = int(len(data_temp))
  
@@ -177,12 +183,13 @@ StandardDev_rem = np.std(Removed_total, axis = 1)
 plt.errorbar(t/6/24,Nnodes - ExpVal_rem,yerr = StandardDev_rem, errorevery = 452, ecolor = 'y', color = 'b')
 
 #%%
-plt.close("all")
+#plt.close("all")
 ExpVal_inf = np.sum(Infections, axis = 1)/Nnodes
 ExpVal_sus = np.sum(Susceptible, axis = 1)/Nnodes
 ExpVal_rem = np.sum(Removed_total, axis = 1)/Nnodes
 
 t=np.linspace(1,tmax,len(ExpVal_inf))
+plt.figure()
 plt.plot(t/6/24,ExpVal_inf, 'k')
 plt.plot(t/6/24,ExpVal_sus, 'b')
 plt.plot(t/6/24,ExpVal_rem, 'r')
