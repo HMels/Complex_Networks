@@ -108,6 +108,7 @@ Alg_con_ag = np.sort(Eiglap_ag[0])
 Alg_con_ag = Alg_con_ag[:,1] #take second smallest eigenvalue
 
 #%% Infection of network using adjancency matrix
+start = timeit.default_timer()
 
 tmax = int(data.timestamp.max())
 beta = 0.2
@@ -117,16 +118,38 @@ Removed = np.zeros([Nnodes, Nnodes])
 Removed_total = np.zeros([tmax,Nnodes])
 Susceptible = np.zeros([tmax,Nnodes])
 
-n_removed = round(len(data)*0.995)
-delete_row = random.sample(range(len(data)),n_removed)
+#n_removed = round(len(data)*0.995)
+#delete_row = random.sample(range(len(data)),n_removed)
 data_dropped = data
-data_dropped = data.drop(delete_row)
-#delete_row.index(1048575)
+#data_dropped = data_dropped.drop(delete_row)
+##delete_row.index(1048575)
+
+duplicates = data.pivot_table(index=['node1','node2'], aggfunc='size')
+duplicates = pd.Series.sort_values(duplicates,ascending=False)
+
+n_deleted_links = 500000
+
+som = 0
+for i in range(len(duplicates)):
+    som = duplicates.values[-i] + som
+    if som > n_deleted_links:
+        row_stop = i
+        print('Number of rows to delete:', i)
+        break
+
+for i in range(row_stop):
+    drop_indices = data[(data[['node1','node2']] == duplicates.index[-i]).all(1)].index.tolist()
+    data_dropped = data_dropped.drop(drop_indices)
+    if i  % 100 == 0:
+        print('We are at:', i/row_stop*100, '%')
 
 
 Aoud = np.eye(Nnodes)
 unit = np.eye(Nnodes)
-start = timeit.default_timer()
+
+
+stop = timeit.default_timer()
+print('Starting evaluation,elapsed time', stop-start)
 
 for i in range(0,tmax):
     #data_temp = data[data.timestamp==i].values
