@@ -109,7 +109,6 @@ Alg_con_ag = Alg_con_ag[:,1] #take second smallest eigenvalue
 
 #%% Infection of network using adjancency matrix
 start = timeit.default_timer()
-
 tmax = int(data.timestamp.max())
 beta = 0.2
 gamma = 0.0002
@@ -118,16 +117,17 @@ Removed = np.zeros([Nnodes, Nnodes])
 Removed_total = np.zeros([tmax,Nnodes])
 Susceptible = np.zeros([tmax,Nnodes])
 
-#n_removed = round(len(data)*0.995)
-#delete_row = random.sample(range(len(data)),n_removed)
+#%% Totaal random
+n_removed = round(len(data)*0.995)
+delete_row = random.sample(range(len(data)),n_removed)
 data_dropped = data
-#data_dropped = data_dropped.drop(delete_row)
+data_dropped = data_dropped.drop(delete_row)
 ##delete_row.index(1048575)
-
+#%% Gebaseerd op minst gebruikte links
 duplicates = data.pivot_table(index=['node1','node2'], aggfunc='size')
 duplicates = pd.Series.sort_values(duplicates,ascending=False)
 
-n_deleted_links = 500000
+n_deleted_links = 100000
 
 som = 0
 for i in range(len(duplicates)):
@@ -141,15 +141,34 @@ for i in range(row_stop):
     drop_indices = data[(data[['node1','node2']] == duplicates.index[-i]).all(1)].index.tolist()
     data_dropped = data_dropped.drop(drop_indices)
     if i  % 100 == 0:
-        print('We are at:', i/row_stop*100, '%')
+        print('We are at:', round(i/row_stop*100), '%. Elapsed Time', round(timeit.default_timer()-start))
+print(len(data)-len(data_dropped), 'links are deleted')
+#%% Gebaseerd op x aantal keer dat een link mag voorkomen
+duplicates = data.pivot_table(index=['node1','node2'], aggfunc='size')
+duplicates = pd.Series.sort_values(duplicates,ascending=False)
 
+max_links = 100
+
+for i in range(len(duplicates)):
+    number_to_drop = duplicates.values[i] - max_links
+    if number_to_drop > 0:
+        drop_indices = data[(data[['node1','node2']] == duplicates.index[i]).all(1)].index.tolist()
+        random.shuffle(drop_indices)
+        del drop_indices[-number_to_drop]
+        data_dropped = data_dropped.drop(drop_indices)
+    print('We are at:', round(i/len(duplicates)*100), '%. Elapsed Time', round(timeit.default_timer()-start))
+print(len(data)-len(data_dropped), 'links are deleted')
+
+
+
+#%%
 
 Aoud = np.eye(Nnodes)
 unit = np.eye(Nnodes)
 
 
 stop = timeit.default_timer()
-print('Starting evaluation,elapsed time', stop-start)
+print('Starting evaluation,elapsed time', round(stop-start))
 
 for i in range(0,tmax):
     #data_temp = data[data.timestamp==i].values
@@ -186,7 +205,8 @@ for i in range(0,tmax):
     Infections[i,:] = np.sum(Aoud, axis=0)
     Susceptible[i,:] = Nnodes - Removed_total[i,:] - Infections[i,:]
 stop = timeit.default_timer()
-print('Time:',stop-start)
+print('Elapsed Time:',stop-start)
+
 
 #%%
 
@@ -219,6 +239,7 @@ plt.figure()
 plt.plot(t/6/24,ExpVal_inf, 'k')
 plt.plot(t/6/24,ExpVal_sus, 'b')
 plt.plot(t/6/24,ExpVal_rem, 'r')
+plt.legend(('Infected' ,'Susceptible', 'Removed'))
 
 
 
