@@ -119,7 +119,7 @@ Alg_con_ag = Alg_con_ag[:,1] #take second smallest eigenvalue
 """Non temporal Situations are described and started here"""
 
 situations = ['No effects', 'Random', 'Isolation', 'Least used nodes', 'Max number of link']
-choose_situation = situations[0]
+choose_situation = situations[2]
 
 start = timeit.default_timer()
 tmax = int(data.timestamp.max())
@@ -175,19 +175,50 @@ if choose_situation == 'Max number of link':
             print('We are at:', round(i/len(duplicates)*100), '%')
 
     print(len(data)-len(data_dropped), 'links are deleted')
+    
+"""Define some functions for the isolation algorithm"""
+def update_isolation(isolated,inf_t,t,isolation,isolation_time):
+    for i in range(len(isolated)):
+        if inf_t[i,1] == t - isolation:
+            if isolated[i] == 0:
+                isolated[i] = 1
+        elif inf_t[i,1] == t - (isolation_time+isolation):
+            if isolated[i] == 1:
+                isolated[i] = 0
+    return isolated
+
+def drop_isolated_links(isolated,data_temp):
+    nonzero = np.nonzero(isolated)[0]
+    dropped1 = data_temp[data_temp.node1.isin(nonzero)].index
+    iso_data = data_temp.drop(dropped1)
+    dropped2 = iso_data[iso_data.node2.isin(nonzero)].index
+    iso_data = iso_data.drop(dropped2)
+    return iso_data
 
 """Starting from here is the evaluation of the infections"""
 
+
 Aoud = np.eye(Nnodes)
 unit = np.eye(Nnodes)
+isolated = np.zeros(Nnodes)
+inf_t = np.zeros([Nnodes,2])
+isolation = 144
+isolation_time = 2016
 
 
 stop = timeit.default_timer()
 print('Starting evaluation,elapsed time till now', round(stop-start))
 
 for i in range(0,tmax):
-    #data_temp = data[data.timestamp==i].values
-    data_temp = data_dropped[data_dropped.timestamp==i].values
+    if choose_situation == 'No effects':
+        data_temp = data[data.timestamp==i].values
+    elif choose_situation == 'Isolation':
+        data_temp = data[data.timestamp==i]
+        isolated = update_isolation(isolated,inf_t,i,isolation,isolation_time)
+        data_temp = drop_isolated_links(isolated,data_temp)
+        data_temp = data_temp.values
+    else:
+        data_temp = data_dropped[data_dropped.timestamp==i].values
     A = np.zeros([Nnodes,Nnodes])
     w = int(len(data_temp))
     
@@ -197,7 +228,17 @@ for i in range(0,tmax):
             if p<beta:    # When p is smaller than beta, (0.11<0.2) then the contact will be counted as an infection, if not, no infection so no changes in infection matrix
                 A[int(data_temp[j,0]-1),int(data_temp[j,1]-1)] = 1
                 A[int(data_temp[j,1]-1),int(data_temp[j,0]-1)] = 1
-      
+                if choose_situation == 'Isolation':
+                    if inf_t[int(data_temp[j,0]-1),0] == 0:
+                        inf_t[int(data_temp[j,0]-1),0] = 1
+                        inf_t[int(data_temp[j,0]-1),1] = i
+                    elif inf_t[int(data_temp[j,1]-1),0] == 0:
+                        inf_t[int(data_temp[j,1]-1),0] = 1
+                        inf_t[int(data_temp[j,1]-1),1] = i
+                    else:
+                        pass
+                else:
+                    pass
         Inf = np.dot(A+unit,Aoud) #infectable content
         Inf[Inf>0]=1
         Aoud = Inf - Removed #current infected nodes
