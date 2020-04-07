@@ -146,14 +146,18 @@ for i in range(row_stop):
 print(len(data)-len(data_dropped), 'links are deleted')
 #%% Gebaseerd op x aantal keer dat een link mag voorkomen
 
+Lmax = 4
 
-
-
-
-
+for i in range(len(duplicates)):
+    drop_indices = data[(data[['node1','node2']] == duplicates.index[-i]).all(1)].index#.tolist()
+    if len(drop_indices) > Lmax:
+        delete_row = random.sample(range(len(drop_indices)),len(drop_indices)-Lmax)
+        delete_row = np.array(delete_row)
+        data_dropped = data_dropped.drop(drop_indices[delete_row])
+    if i  % 100 == 0:
+        print('We are at:', i/len(duplicates)*100, '%')
 
 print(len(data)-len(data_dropped), 'links are deleted')
-
 
 
 #%%
