@@ -9,12 +9,12 @@ import random
 import numpy.random as rnd
 import timeit
 
-simulation = 'Haggle' 
-#simulation = 'MIT'
+#simulation = 'Haggle' 
+simulation = 'MIT'
 
-if simulation == 'Haggle':
-    B = pd.read_excel (r'MIT_data_sorted.xlsx')
 if simulation == 'MIT':
+    B = pd.read_excel (r'MIT_data_sorted.xlsx')
+if simulation == 'Haggle':
     B = pd.read_excel (r'data_Haggle_sorted.xlsx')
 
 #data = data.drop_duplicates()
@@ -116,69 +116,74 @@ Alg_con_ag = np.sort(Eiglap_ag[0])
 Alg_con_ag = Alg_con_ag[:,1] #take second smallest eigenvalue
 
 #%% Infection of network using adjancency matrix 
-"""Evaluation starts here"""
+"""Non temporal Situations are described and started here"""
+
+situations = ['No effects', 'Random', 'Isolation', 'Least used nodes', 'Max number of link']
+choose_situation = situations[0]
+
 start = timeit.default_timer()
 tmax = int(data.timestamp.max())
-beta = 0.2
+
 if simulation == 'Haggle':
-    gamma = 0.0002/600
+    gamma = 0.0002
+    beta = 0.3
 if simulation == 'MIT':
     gamma = 0.0002
+    beta = 0.01
 Infections = np.zeros([tmax,Nnodes])
 Removed = np.zeros([Nnodes, Nnodes])
 Removed_total = np.zeros([tmax,Nnodes])
 Susceptible = np.zeros([tmax,Nnodes])
 data_dropped = data
 
-#%% Totaal random
-n_removed = round(len(data)*0.995)
-delete_row = random.sample(range(len(data)),n_removed)
-data_dropped = data_dropped.drop(delete_row)
-##delete_row.index(1048575)
-#%% Gebaseerd op minst gebruikte links
-duplicates = data.pivot_table(index=['node1','node2'], aggfunc='size')
-duplicates = pd.Series.sort_values(duplicates,ascending=False)
+if choose_situation == 'Random':
+    n_removed = round(len(data)*0.995)
+    delete_row = random.sample(range(len(data)),n_removed)
+    data_dropped = data_dropped.drop(delete_row)
+    
+if choose_situation == 'Least used nodes':
+    duplicates = data.pivot_table(index=['node1','node2'], aggfunc='size')
+    duplicates = pd.Series.sort_values(duplicates,ascending=False)
 
-n_deleted_links = 50000
+    n_deleted_links = 50000
 
-som = 0
-for i in range(len(duplicates)):
-    som = duplicates.values[-i] + som
-    if som > n_deleted_links:
-        row_stop = i
-        print('Number of rows to delete:', i)
-        break
+    som = 0
+    for i in range(len(duplicates)):
+        som = duplicates.values[-i] + som
+        if som > n_deleted_links:
+            row_stop = i
+            print('Number of rows to delete:', i)
+            break
 
-for i in range(row_stop):
-    drop_indices = data[(data[['node1','node2']] == duplicates.index[-i]).all(1)].index.tolist()
-    data_dropped = data_dropped.drop(drop_indices)
-    if i  % 100 == 0:
-        print('We are at:', round(i/row_stop*100), '%. Elapsed Time', round(timeit.default_timer()-start))
-print(len(data)-len(data_dropped), 'links are deleted')
-#%% Gebaseerd op x aantal keer dat een link mag voorkomen
+    for i in range(row_stop):
+        drop_indices = data[(data[['node1','node2']] == duplicates.index[-i]).all(1)].index.tolist()
+        data_dropped = data_dropped.drop(drop_indices)
+        if i  % 100 == 0:
+            print('We are at:', round(i/row_stop*100), '%. Elapsed Time', round(timeit.default_timer()-start))
+    print(len(data)-len(data_dropped), 'links are deleted')
+    
+if choose_situation == 'Max number of link':
+    Lmax = 2
+    
+    for i in range(len(duplicates)):
+        drop_indices = data[(data[['node1','node2']] == duplicates.index[-i]).all(1)].index#.tolist()
+        if len(drop_indices) > Lmax:
+            delete_row = random.sample(range(len(drop_indices)),len(drop_indices)-Lmax)
+            delete_row = np.array(delete_row)
+            data_dropped = data_dropped.drop(drop_indices[delete_row])
+        if i  % 100 == 0:
+            print('We are at:', round(i/len(duplicates)*100), '%')
 
-Lmax = 2
+    print(len(data)-len(data_dropped), 'links are deleted')
 
-for i in range(len(duplicates)):
-    drop_indices = data[(data[['node1','node2']] == duplicates.index[-i]).all(1)].index#.tolist()
-    if len(drop_indices) > Lmax:
-        delete_row = random.sample(range(len(drop_indices)),len(drop_indices)-Lmax)
-        delete_row = np.array(delete_row)
-        data_dropped = data_dropped.drop(drop_indices[delete_row])
-    if i  % 100 == 0:
-        print('We are at:', round(i/len(duplicates)*100), '%')
-
-print(len(data)-len(data_dropped), 'links are deleted')
-
-
-#%%
+"""Starting from here is the evaluation of the infections"""
 
 Aoud = np.eye(Nnodes)
 unit = np.eye(Nnodes)
 
 
 stop = timeit.default_timer()
-print('Starting evaluation,elapsed time', round(stop-start))
+print('Starting evaluation,elapsed time till now', round(stop-start))
 
 for i in range(0,tmax):
     #data_temp = data[data.timestamp==i].values
@@ -222,8 +227,7 @@ stop = timeit.default_timer()
 print('Elapsed Time:',stop-start)
 
 
-#%%
-
+'''Plotting'''
 plt.close("all")
 
 ExpVal = np.sum(Infections, axis = 1)/Nnodes
