@@ -107,7 +107,8 @@ Eiglap_ag = np.linalg.eig(Lap_ag) #stores eigenvalues and eigenvectors
 Alg_con_ag = np.sort(Eiglap_ag[0])
 Alg_con_ag = Alg_con_ag[:,1] #take second smallest eigenvalue
 
-#%% Infection of network using adjancency matrix
+#%% Infection of network using adjancency matrix 
+"""Evaluation starts here"""
 start = timeit.default_timer()
 tmax = int(data.timestamp.max())
 beta = 0.2
@@ -116,11 +117,11 @@ Infections = np.zeros([tmax,Nnodes])
 Removed = np.zeros([Nnodes, Nnodes])
 Removed_total = np.zeros([tmax,Nnodes])
 Susceptible = np.zeros([tmax,Nnodes])
+data_dropped = data
 
 #%% Totaal random
 n_removed = round(len(data)*0.995)
 delete_row = random.sample(range(len(data)),n_removed)
-data_dropped = data
 data_dropped = data_dropped.drop(delete_row)
 ##delete_row.index(1048575)
 #%% Gebaseerd op minst gebruikte links
@@ -144,19 +145,13 @@ for i in range(row_stop):
         print('We are at:', round(i/row_stop*100), '%. Elapsed Time', round(timeit.default_timer()-start))
 print(len(data)-len(data_dropped), 'links are deleted')
 #%% Gebaseerd op x aantal keer dat een link mag voorkomen
-duplicates = data.pivot_table(index=['node1','node2'], aggfunc='size')
-duplicates = pd.Series.sort_values(duplicates,ascending=False)
 
-max_links = 100
 
-for i in range(len(duplicates)):
-    number_to_drop = duplicates.values[i] - max_links
-    if number_to_drop > 0:
-        drop_indices = data[(data[['node1','node2']] == duplicates.index[i]).all(1)].index.tolist()
-        random.shuffle(drop_indices)
-        del drop_indices[-number_to_drop]
-        data_dropped = data_dropped.drop(drop_indices)
-    print('We are at:', round(i/len(duplicates)*100), '%. Elapsed Time', round(timeit.default_timer()-start))
+
+
+
+
+
 print(len(data)-len(data_dropped), 'links are deleted')
 
 
