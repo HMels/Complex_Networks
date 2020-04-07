@@ -9,16 +9,24 @@ import random
 import numpy.random as rnd
 import timeit
 
-#data = pd.read_excel (r'C:\Users\Thierry\Documents\Studie\TU Delft Applied Physics\CS4195 Modeling and Data Analysis in Complex Networks\Assignment1\manufacturing_emails_temporal_network.xlsx')
-B = pd.read_excel (r'MIT_data_sorted.xlsx')
-#data = pd.read_excel (r'C:\Users\rixtb\Documents\Master\Data analysis\Datasets\oefenset.xlsx')
+simulation = 'Haggle' 
+#simulation = 'MIT'
+
+if simulation == 'Haggle':
+    B = pd.read_excel (r'MIT_data_sorted.xlsx')
+if simulation == 'MIT':
+    B = pd.read_excel (r'data_Haggle_sorted.xlsx')
+
 #data = data.drop_duplicates()
 
 data = B
 Nnodes = np.max([data['node1'].max(), data['node2'].max()])
 Nlinks = len(data)
 Tmin = np.max([data['timestamp'].min()])
-data['timestamp'] = ( data['timestamp'] - Tmin) /600         #first timestamp is 0, every timestep is 10 minutes
+if simulation == 'Haggle':
+    data['timestamp'] = ( data['timestamp'] - Tmin)  
+if simulation == 'MIT':
+    data['timestamp'] = ( data['timestamp'] - Tmin)/600         #first timestamp is 0, every timestep is 10 minutes
 
 #%% Make iGraph
 g = igraph.Graph()
@@ -112,7 +120,10 @@ Alg_con_ag = Alg_con_ag[:,1] #take second smallest eigenvalue
 start = timeit.default_timer()
 tmax = int(data.timestamp.max())
 beta = 0.2
-gamma = 0.0002
+if simulation == 'Haggle':
+    gamma = 0.0002/600
+if simulation == 'MIT':
+    gamma = 0.0002
 Infections = np.zeros([tmax,Nnodes])
 Removed = np.zeros([Nnodes, Nnodes])
 Removed_total = np.zeros([tmax,Nnodes])
@@ -128,7 +139,7 @@ data_dropped = data_dropped.drop(delete_row)
 duplicates = data.pivot_table(index=['node1','node2'], aggfunc='size')
 duplicates = pd.Series.sort_values(duplicates,ascending=False)
 
-n_deleted_links = 100000
+n_deleted_links = 50000
 
 som = 0
 for i in range(len(duplicates)):
@@ -146,7 +157,7 @@ for i in range(row_stop):
 print(len(data)-len(data_dropped), 'links are deleted')
 #%% Gebaseerd op x aantal keer dat een link mag voorkomen
 
-Lmax = 4
+Lmax = 2
 
 for i in range(len(duplicates)):
     drop_indices = data[(data[['node1','node2']] == duplicates.index[-i]).all(1)].index#.tolist()
@@ -155,7 +166,7 @@ for i in range(len(duplicates)):
         delete_row = np.array(delete_row)
         data_dropped = data_dropped.drop(drop_indices[delete_row])
     if i  % 100 == 0:
-        print('We are at:', i/len(duplicates)*100, '%')
+        print('We are at:', round(i/len(duplicates)*100), '%')
 
 print(len(data)-len(data_dropped), 'links are deleted')
 
@@ -174,17 +185,18 @@ for i in range(0,tmax):
     data_temp = data_dropped[data_dropped.timestamp==i].values
     A = np.zeros([Nnodes,Nnodes])
     w = int(len(data_temp))
- 
-    for j in range(w):
-        p = rnd.rand()
-        if p<beta:    # When p is smaller than beta, (0.11<0.2) then the contact will be counted as an infection, if not, no infection so no changes in infection matrix
-            A[int(data_temp[j,0]-1),int(data_temp[j,1]-1)] = 1
-            A[int(data_temp[j,1]-1),int(data_temp[j,0]-1)] = 1
+    
+    if data_temp.size:
+        for j in range(w):
+            p = rnd.rand()
+            if p<beta:    # When p is smaller than beta, (0.11<0.2) then the contact will be counted as an infection, if not, no infection so no changes in infection matrix
+                A[int(data_temp[j,0]-1),int(data_temp[j,1]-1)] = 1
+                A[int(data_temp[j,1]-1),int(data_temp[j,0]-1)] = 1
       
-    Inf = np.dot(A+unit,Aoud) #infectable content
-    Inf[Inf>0]=1
-    Aoud = Inf - Removed #current infected nodes
-    Aoud[Aoud<0]=0
+        Inf = np.dot(A+unit,Aoud) #infectable content
+        Inf[Inf>0]=1
+        Aoud = Inf - Removed #current infected nodes
+        Aoud[Aoud<0]=0
     if True:
         locate = np.argwhere(Aoud>0) #search for infected nodes
     
@@ -203,6 +215,9 @@ for i in range(0,tmax):
     Removed_total[i,:] = np.sum(Removed, axis=0)      
     Infections[i,:] = np.sum(Aoud, axis=0)
     Susceptible[i,:] = Nnodes - Removed_total[i,:] - Infections[i,:]
+    if i  % 1000 == 0:
+        print('We are at:', round(i/tmax*100), '%')
+    
 stop = timeit.default_timer()
 print('Elapsed Time:',stop-start)
 
@@ -215,29 +230,42 @@ ExpVal = np.sum(Infections, axis = 1)/Nnodes
 StandardDev = np.std(Infections, axis = 1)
 
 t=np.linspace(1,tmax,len(ExpVal))
-plt.axes(xlim=(0,tmax/6/24))
-plt.xlabel('Time(days)')
-plt.ylabel('Average Infected Nodes')
-#plt.title('Average Infected Nodes Versus Time With Corresponding Standard Deviation')
-plt.errorbar(t/6/24,ExpVal,yerr = StandardDev, errorevery = 400, ecolor = 'r', color = 'k')
-
 ExpVal_rem = np.sum(Removed_total, axis = 1)/Nnodes
 StandardDev_rem = np.std(Removed_total, axis = 1)
 
-#plt.title('Average Infected Nodes Versus Time With Corresponding Standard Deviation')
-plt.errorbar(t/6/24,Nnodes - ExpVal_rem,yerr = StandardDev_rem, errorevery = 452, ecolor = 'y', color = 'b')
+y1 = ExpVal
+y2 = Nnodes - ExpVal_rem
+if simulation == 'Haggle':
+    x=t/60/60/24  
+if simulation == 'MIT':
+    x=t/6/24 
 
-#%%
-#plt.close("all")
+#plt.title('Average Infected Nodes Versus Time With Corresponding Standard Deviation')
+plt.figure()
+plt.xlabel('Time(days)')
+plt.ylabel('Average Infected Nodes')
+plt.axes(ylim=(0,Nnodes),xlim=(0,np.max(x)))
+
+plt.errorbar(x,ExpVal,yerr = StandardDev, errorevery = 400, ecolor = 'r', color = 'k')
+plt.errorbar(x,Nnodes - ExpVal_rem,yerr = StandardDev_rem, errorevery = 452, ecolor = 'y', color = 'b')
+
+plt.figure()
+plt.plot(x,y1,'k',x,y2,'k')
+plt.axes(ylim=(0,Nnodes),xlim=(0,np.max(x)))
+plt.fill_between(x,y1,y2,where=y2>=y1,facecolor = 'teal')
+plt.fill_between(x,0,y1,facecolor = 'r')
+plt.fill_between(x,y2,Nnodes,facecolor = 'silver')
+
+
 ExpVal_inf = np.sum(Infections, axis = 1)/Nnodes
 ExpVal_sus = np.sum(Susceptible, axis = 1)/Nnodes
-ExpVal_rem = np.sum(Removed_total, axis = 1)/Nnodes
+ExpVal_rem2 = np.sum(Removed_total, axis = 1)/Nnodes
 
 t=np.linspace(1,tmax,len(ExpVal_inf))
 plt.figure()
-plt.plot(t/6/24,ExpVal_inf, 'k')
-plt.plot(t/6/24,ExpVal_sus, 'b')
-plt.plot(t/6/24,ExpVal_rem, 'r')
+plt.plot(x,ExpVal_inf, 'k')
+plt.plot(x,ExpVal_sus, 'b')
+plt.plot(x,ExpVal_rem2, 'r')
 plt.legend(('Infected' ,'Susceptible', 'Removed'))
 
 
