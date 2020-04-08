@@ -1,0 +1,5 @@
+44.385416666666664: Average maximum number of infections
+23.270833333333332: Susceptible nodes left on average
+Removed links: 0
+beta 0.009
+gamma 0.00015

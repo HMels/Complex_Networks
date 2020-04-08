@@ -1,0 +1,10 @@
+LU: Leased used nodes
+RA: Random deleted links
+IS: Isolated nodes
+OR: Original dataset
+rem: #removed links
+err: errorbar plot
+area: Area plot
+SIR: Susceptible, Infected, Removed plot
+t: time before isolation in days
+d: duration of isolation in weeks
