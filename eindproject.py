@@ -9,8 +9,8 @@ import random
 import numpy.random as rnd
 import timeit
 
-simulation = 'Haggle' 
-#imulation = 'MIT'
+#simulation = 'Haggle' 
+simulation = 'MIT'
 
 if simulation == 'MIT':
     B = pd.read_excel (r'MIT_data_sorted.xlsx')
@@ -120,14 +120,14 @@ Alg_con_ag = Alg_con_ag[:,1] #take second smallest eigenvalue
 plt.close("all")
 
 situations = ['No effects', 'Random', 'Isolation', 'Least used nodes', 'Max number of link']
-choose_situation = situations[0]
+choose_situation = situations[4]
 
 start = timeit.default_timer()
 tmax = int(data.timestamp.max())
 
 if simulation == 'Haggle':
     gamma = 0
-    beta = 0.4
+    beta = 0.8
 if simulation == 'MIT':
     gamma = 0.00015
     beta = 0.009
@@ -138,7 +138,7 @@ Susceptible = np.zeros([tmax,Nnodes])
 data_dropped = data
 
 if choose_situation == 'Random':
-    n_removed = round(len(data)*0.7)
+    n_removed = 900500
     delete_row = random.sample(range(len(data)),n_removed)
     data_dropped = data_dropped.drop(delete_row)
     
@@ -148,28 +148,34 @@ if choose_situation == 'Least used nodes':
     duplicates = data.pivot_table(index=['node1','node2'], aggfunc='size')
     duplicates = pd.Series.sort_values(duplicates,ascending=False)
 
-    n_deleted_links = round(len(data)*0.5)
+    n_deleted_links = 169124
 
     som = 0
     for i in range(len(duplicates)):
         som = duplicates.values[-i] + som
         if som > n_deleted_links:
             row_stop = i
+            som = som - duplicates.values[-i]
             print('Number of rows to delete:', i)
             break
-
+    
     for i in range(row_stop):
         drop_indices = data[(data[['node1','node2']] == duplicates.index[-i]).all(1)].index.tolist()
         data_dropped = data_dropped.drop(drop_indices)
         if i  % 100 == 0:
             print('We are at:', round(i/row_stop*100), '%. Elapsed Time', round(timeit.default_timer()-start))
+    
+    n_removed = int(n_deleted_links - som)
+    drop_indices = data[(data[['node1','node2']] == duplicates.index[-(row_stop+1)]).all(1)].index.tolist()
+    data_dropped = data_dropped.drop(random.sample(drop_indices,n_removed))
+    
     print(len(data)-len(data_dropped), 'links are deleted')
     
 if choose_situation == 'Max number of link':
     duplicates = data.pivot_table(index=['node1','node2'], aggfunc='size')
     duplicates = pd.Series.sort_values(duplicates,ascending=False)
     
-    Lmax = 2
+    Lmax = 49
     
     for i in range(len(duplicates)):
         drop_indices = data[(data[['node1','node2']] == duplicates.index[-i]).all(1)].index#.tolist()
@@ -280,11 +286,11 @@ print('Elapsed Time:',stop-start)
 '''Plotting'''
 
 '''Observables'''
-maxInf = np.max(np.sum(Infections,axis=1))/Nnodes
-print('The average maximum number over infections is:',maxInf)
-Scsleft = np.sum(Susceptible[-1])/Nnodes
-print('There are',Scsleft,'susceptible nodes left on average')
-
+maxInf = np.max(np.sum(Infections,axis=1))/(Nnodes**2)*100
+print('The average maximum number over infections is:',maxInf, '%')
+Scsleft = np.sum(Susceptible[-1])/(Nnodes**2)*100
+print('There are',Scsleft,'% susceptible nodes left on average')
+#%%
 ExpVal = np.sum(Infections, axis = 1)/(Nnodes**2)*100       #percentage of total nodes
 StandardDev = np.std(Infections, axis = 1)/Nnodes *100       # percentage of total nodes
 ExpVal_rem = np.sum(Removed_total, axis = 1)/(Nnodes**2)*100  
@@ -301,35 +307,38 @@ if simulation == 'MIT':
     x=t/6/24 
 
 plt.figure()
-plt.title('Average Infected and Removed Nodes Versus Time With Corresponding Standard Deviation')
 plt.axes(ylim=(0,100),xlim=(0,np.max(x)))
-plt.errorbar(x,ExpVal,yerr = StandardDev, errorevery = 400, ecolor = 'r', color = 'k')
-plt.errorbar(x,Nnodes - ExpVal_rem,yerr = StandardDev_rem, errorevery = 452, ecolor = 'y', color = 'b')
+if simulation == 'Haggle':
+    plt.errorbar(x,ExpVal,yerr = StandardDev, errorevery = 4000, ecolor = 'r', color = 'k')
+    plt.errorbar(x,100 - ExpVal_rem,yerr = StandardDev_rem, errorevery = 4520, ecolor = 'y', color = 'b')
+else:
+    plt.errorbar(x,ExpVal,yerr = StandardDev, errorevery = 400, ecolor = 'r', color = 'k')
+    plt.errorbar(x,100 - ExpVal_rem,yerr = StandardDev_rem, errorevery = 452, ecolor = 'y', color = 'b')
+
 plt.legend(('Infected' , 'Removed'))
 plt.xlabel('Time(days)')
-plt.ylabel('Average Number of Nodes')
+plt.ylabel('Average Percentage of Nodes')
+plt.title(r'Average % of infected and removed nodes versus time with $\sigma$')
 
 plt.figure()
-plt.title('Average Infected and Removed Nodes Versus Time')
 plt.plot(x,y1,'k',x,y2,'k')
 plt.axes(ylim=(0,100),xlim=(0,np.max(x)))
 plt.fill_between(x,y1,y2,where=y2>=y1,facecolor = 'teal')
 plt.fill_between(x,0,y1,facecolor = 'r')
-plt.fill_between(x,y2,Nnodes,facecolor = 'silver')
+plt.fill_between(x,y2,100,facecolor = 'silver')
+plt.title('Average % of infected and removed nodes versus time')
 plt.xlabel('Time(days)')
-plt.ylabel('Average Number of Nodes')
-
+plt.ylabel('Average Percentage of Nodes')
 
 plt.figure()
-plt.title('SIR Model')
 plt.axes(ylim=(0,100),xlim=(0,np.max(x)))
 plt.plot(x,ExpVal, 'k')
 plt.plot(x,ExpVal_sus, 'b')
 plt.plot(x,ExpVal_rem, 'r')
+plt.title('SIR Model')
 plt.legend(('Infected' ,'Susceptible', 'Removed'))
 plt.xlabel('Time(days)')
-plt.ylabel('Average Number of Nodes')
-
+plt.ylabel('Average Percentage of Nodes')
 
 
 
