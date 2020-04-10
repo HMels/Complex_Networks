@@ -120,7 +120,7 @@ Alg_con_ag = Alg_con_ag[:,1] #take second smallest eigenvalue
 plt.close("all")
 
 situations = ['No effects', 'Random', 'Isolation', 'Least used nodes', 'Max number of link']
-choose_situation = situations[4]
+choose_situation = situations[0]
 
 start = timeit.default_timer()
 tmax = int(data.timestamp.max())
@@ -216,8 +216,8 @@ Aoud = np.eye(Nnodes)
 unit = np.eye(Nnodes)
 isolated = np.zeros(Nnodes)
 inf_t = np.zeros([Nnodes,2])
-isolation = 144     #isolation after this time frame
-isolation_time = 2016  #duration of isolation
+isolation = 144*1     #isolation after this time frame
+isolation_time = 1008*1  #duration of isolation
 Ndropped = 0
 
 
@@ -288,6 +288,8 @@ print('Elapsed Time:',stop-start)
 '''Observables'''
 maxInf = np.max(np.sum(Infections,axis=1))/(Nnodes**2)*100
 print('The average maximum number over infections is:',maxInf, '%')
+tmaxinf = np.argmax(np.sum(Infections,axis=1))
+print('The timestamp of the maximum number of infections is:',tmaxinf)
 Scsleft = np.sum(Susceptible[-1])/(Nnodes**2)*100
 print('There are',Scsleft,'% susceptible nodes left on average')
 #%%
