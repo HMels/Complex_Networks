@@ -13,7 +13,8 @@ import timeit
 simulation = 'MIT'
 
 if simulation == 'MIT':
-    B = pd.read_excel (r'MIT_data_sorted.xlsx')
+    #B = pd.read_excel (r'MIT_data_sorted.xlsx')
+    B = pd.read_excel(r'C:\Users\cleoo\Documents\Complex Network\Complex_Networks\Final_assignment\MIT_data_sorted.xlsx')
 if simulation == 'Haggle':
     B = pd.read_excel (r'data_Haggle_sorted.xlsx')
 
@@ -342,9 +343,37 @@ plt.legend(('Infected' ,'Susceptible', 'Removed'))
 plt.xlabel('Time(days)')
 plt.ylabel('Average Percentage of Nodes')
 
+#%% Plot gamma distribution
+#gamma has a geometrical ditribution
+tmax = int(data.timestamp.max())
+t=np.linspace(1,tmax,tmax)
 
+gamma = 0.00015
+beta = 0.009
 
+mean = 1/gamma 
+var = ((1-gamma)/gamma**2)
+sigma =np.sqrt(var)
+PDF = np.cumsum((1-gamma)**(t-1) *gamma)
 
+mean = mean/6/24 
+sigma = sigma/6/24
+t = t/6/24
+Gaus = 1/(sigma*np.sqrt(2*np.pi))*np.exp(-1/2*((t-mean)/sigma)**2)
+print('average time till recovery is', mean, 'days')
 
+plt.figure()
+plt.plot(t,PDF)
+plt.axvline(x=mean, color='r')
+plt.title('Changes of recovery versus time of the infection')
+plt.xlabel('Time(days)')
+plt.ylabel('Change of recovery')
+plt.legend(('change of recovery','average recovery time'))
 
-
+plt.figure()
+plt.plot(t,Gaus)
+plt.axvline(x=mean, color='r')
+plt.title('Distribution of recovery times')
+plt.xlabel('Time(days)')
+plt.ylabel('recoveries on this day')
+plt.legend(('recoveries','average recovery time'))
