@@ -1,0 +1,6 @@
+Removed: 353828
+The average maximum number over infections is: 39.93055555555556 %
+The timestamp of the maximum number of infections is: 3329
+There are 20.48611111111111 % susceptible nodes left on average
+beta 0.009
+gamma 0.00025
