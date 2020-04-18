@@ -1,0 +1,7 @@
+13.172743055555555: % of Average maximum number of infections
+68.60894097222221: % of Susceptible nodes left on average
+5.603472222222222: Days at averamge maximum number of infections
+8069: Timestep at average maximum number of infections
+Removed links: 508178
+beta 0.009
+gamma 0.00025
