@@ -1,0 +1,23 @@
+What do we want: erase as much of the 'randomness' in the infection as possible
+How to do this: Set beta to 1. Now infection is always transmitted. 
+Do not use gamma but a constant amount of timestamp for the infection duration. 
+This duration should be dependent on how the infection grows in the network. 
+
+What did I try:
+get the time it takes for the infection to go from 20 to 40 or 40 to 60 percent of nodes. 
+Take this time around 800 or 1600 timestamps. Problem: there seem to be some 'pauses' in the data. 
+So the infection time should be longer than these pauses for the infection to sustain. 
+Now I used the amount of timesteps to go from 80% infected to 90% when beta is 1 and for no removal of nodes.
+
+Haggle:
+Tried to do the same for haggle, problem with this dataset. 
+Dataset has over 300000 timestamps so matrix for removed gets to large. Most timestamps are not used.
+ideas: Cropped the data, every 20 timestamps are now 1 timestamp. Since most jumps are around 100 ts, should not be a problem.
+
+
+
+Idea: erase all timestamps where nothing happens??
+
+# of nodes
+# of contacts per timestamp per nodes?? 
+# of timestamps untill all a certain percentage of nodes is infected
