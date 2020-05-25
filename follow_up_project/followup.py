@@ -6,17 +6,19 @@ import matplotlib.pyplot as plt
 import numpy.random as rnd
 import timeit
 
-"""
-Created on Sun May 10 10:43:36 2020
 
-@author: cleoo
-"""
 simulation = 'HS2012'
 #simulation = 'Haggle' 
 #simulation = 'MIT'
 
 if simulation == 'HS2012':
-    data = pd.read_excel(r'C:\Users\cleoo\Documents\Complex Network\Complex_Networks\follow_up_project\HS2012.xlsx')
+    data = pd.read_csv(r'thiers_2012.csv', delim_whitespace=True, header =None)
+    data.columns = ['timestamp', 'node1', 'node2', 'triv1', 'triv2']
+    data = data.drop(columns =['triv1','triv2'])
+    for i in range(len(data['node1'].unique())):
+        data['node2'] = data['node2'].where(data['node2']!=data['node1'].unique()[i],other = i+1)
+        data['node1'] = data['node1'].where(data['node1']!=data['node1'].unique()[i],other = i+1)    #data = pd.read_excel(r'C:\Users\cleoo\Documents\Complex Network\Complex_Networks\follow_up_project\HS2012.xlsx')
+
 if simulation == 'Haggle':
     data = pd.read_excel (r'C:\Users\cleoo\Documents\Complex Network\Complex_Networks\Final_assignment\data_Haggle_sorted.xlsx')
 if simulation == 'MIT':
