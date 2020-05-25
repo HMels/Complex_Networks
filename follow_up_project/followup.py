@@ -7,23 +7,71 @@ import numpy.random as rnd
 import timeit
 
 
-simulation = 'HS2012'
+simulation = 'HS2013'
 #simulation = 'Haggle' 
 #simulation = 'MIT'
+
+if simulation == 'HS2011':
+    data = pd.read_csv(r'thiers_2011.csv', delim_whitespace=True, header =None)
+    data.columns = ['timestamp', 'node1', 'node2', 'triv1', 'triv2']
+    data = data.drop(columns =['triv1','triv2'])
+    data = data[['node1', 'node2', 'timestamp']]
+    data['node2']+= 1000
+    data['node1']+= 1000
+    unique_node1 = len(data['node1'].unique())
+
+
+    for i in range(len(data['node1'].unique())):
+        data['node2'] = data['node2'].where(data['node2']!=sorted(data['node1'].unique())[i],other = i)
+        data['node1'] = data['node1'].where(data['node1']!=sorted(data['node1'].unique())[i],other = i)     
+    
+    test = data['node2'].where(data['node2']>unique_node1)
+    test = test.dropna()
+    for i in range(len(test.unique())):
+        data['node2'] = data['node2'].where(data['node2']!=sorted(test.unique())[i],other = i+unique_node1)
+
 
 if simulation == 'HS2012':
     data = pd.read_csv(r'thiers_2012.csv', delim_whitespace=True, header =None)
     data.columns = ['timestamp', 'node1', 'node2', 'triv1', 'triv2']
     data = data.drop(columns =['triv1','triv2'])
+    data = data[['node1', 'node2', 'timestamp']]
+    unique_node1 = len(data['node1'].unique())
+
     for i in range(len(data['node1'].unique())):
-        data['node2'] = data['node2'].where(data['node2']!=data['node1'].unique()[i],other = i+1)
-        data['node1'] = data['node1'].where(data['node1']!=data['node1'].unique()[i],other = i+1)    #data = pd.read_excel(r'C:\Users\cleoo\Documents\Complex Network\Complex_Networks\follow_up_project\HS2012.xlsx')
+        data['node2'] = data['node2'].where(data['node2']!=sorted(data['node1'].unique())[i],other = i)
+        data['node1'] = data['node1'].where(data['node1']!=sorted(data['node1'].unique())[i],other = i)  
+    
+    test = data['node2'].where(data['node2']>unique_node1)
+    test = test.dropna()
+    for i in range(len(test.unique())):
+        data['node2'] = data['node2'].where(data['node2']!=sorted(test.unique())[i],other = i+unique_node1)
+ 
+
+if simulation == 'HS2013':
+    data = pd.read_csv(r'HS2013.CSV', delim_whitespace=True, header =None)
+    data.columns = ['timestamp', 'node1', 'node2', 'triv1', 'triv2']
+    data = data.drop(columns =['triv1','triv2'])
+    data = data[['node1', 'node2', 'timestamp']]
+    data['node2']+= 1000
+    data['node1']+= 1000
+    unique_node1 = len(data['node1'].unique())
+    
+    for i in range(unique_node1):
+        data['node2'] = data['node2'].where(data['node2']!=sorted(data['node1'].unique())[i],other = i)
+        data['node1'] = data['node1'].where(data['node1']!=sorted(data['node1'].unique())[i],other = i)
+    
+    test = data['node2'].where(data['node2']>unique_node1)
+    test = test.dropna()
+    for i in range(len(test.unique())):
+        data['node2'] = data['node2'].where(data['node2']!=sorted(test.unique())[i],other = i+unique_node1)    
+      
 
 if simulation == 'Haggle':
     data = pd.read_excel (r'C:\Users\cleoo\Documents\Complex Network\Complex_Networks\Final_assignment\data_Haggle_sorted.xlsx')
 if simulation == 'MIT':
-    #data = pd.read_excel (r'MIT_data_sorted.xlsx')
-    data = pd.read_excel(r'C:\Users\cleoo\Documents\Complex Network\Complex_Networks\Final_assignment\MIT_data_sorted.xlsx')
+    data = pd.read_excel (r'MIT_data_sorted.xlsx')
+    #data = pd.read_excel(r'C:\Users\cleoo\Documents\Complex Network\Complex_Networks\Final_assignment\MIT_data_sorted.xlsx')
 
 nodes = data['node1'].drop_duplicates() + data['node2'].drop_duplicates()
 nodes = nodes.drop_duplicates()
@@ -31,7 +79,11 @@ nodes = nodes.drop_duplicates()
 Nnodes = np.max([data['node1'].max(), data['node2'].max()])
 Nlinks = len(data)
 tmin = np.max([data['timestamp'].min()])
+if simulation == 'HS2011':
+    data['timestamp'] = np.round(( data['timestamp'] - tmin)/20)
 if simulation == 'HS2012':
+    data['timestamp'] = np.round(( data['timestamp'] - tmin)/20)
+if simulation == 'HS2013':
     data['timestamp'] = np.round(( data['timestamp'] - tmin)/20)
 if simulation == 'Haggle':
     data['timestamp'] = np.round(( data['timestamp'] - tmin)/20) 
@@ -49,6 +101,16 @@ plt.close("all")
 
 start = timeit.default_timer()
 tmax = int(data.timestamp.max())
+
+if simulation == 'HS2011':
+    gamma = 0
+    beta = 1
+    Tinf = 2821
+if simulation == 'HS2013':
+    gamma = 0
+    beta = 1
+    Tinf = 2821
+
 
 if simulation == 'HS2012':
     gamma = 0
