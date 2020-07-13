@@ -5,9 +5,9 @@ import matplotlib.pyplot as plt
 
 import numpy.random as rnd
 import timeit
+import random
 
-
-simulation = 'HS2013'
+simulation = 'HS2011'
 #simulation = 'Haggle' 
 #simulation = 'MIT'
 
@@ -91,7 +91,7 @@ if simulation == 'MIT':
     data['timestamp'] = ( data['timestamp'] - tmin)/600         #first timestamp is 0, every timestep is 10 minutes
 
 tmax = int(data.timestamp.max())
-n_links_t_nodes = Nlinks/tmax/Nnodes
+percentage_dropped = 0.60 
 #haggle (addapted is 0.006 and for MIT = 0.36)
 #%% Analysis
 
@@ -110,8 +110,6 @@ if simulation == 'HS2013':
     gamma = 0
     beta = 1
     Tinf = 2821
-
-
 if simulation == 'HS2012':
     gamma = 0
     beta = 1
@@ -121,8 +119,8 @@ if simulation == 'Haggle':
     beta = 1
     Tinf = 2821
 if simulation == 'MIT':
-    gamma = 0#0.00025
-    beta = 1#0.009
+    gamma = 0
+    beta = 1
     Tinf = 1843
 Infections = np.zeros([tmax,Nnodes])
 #Removed = np.zeros([tmax,Nnodes, Nnodes])
@@ -130,6 +128,43 @@ Removed_total = np.zeros([tmax,Nnodes])
 Susceptible = np.zeros([tmax,Nnodes])
 data_dropped = data
 
+"""Mittigation strategy"""
+situations = ['No effects', 'Random', 'Isolation', 'Least used nodes', 'Max number of link']
+choose_situation = situations[3]
+T10 = 46
+Tbegin = T10
+Tend = 40000.25*tmax
+
+
+if choose_situation == 'Least used nodes':
+    data_timeframe = data.loc[Tbegin <= data['timestamp']]
+    data_timeframe = data.loc[data['timestamp'] <= Tend]
+    duplicates = data_timeframe
+    duplicates = data.pivot_table(index=['node1','node2'], aggfunc='size')
+    duplicates = pd.Series.sort_values(duplicates,ascending=False)
+    n_deleted_links = len(data_timeframe)*percentage_dropped
+
+    som = 0
+    for i in range(len(duplicates)):
+        som = duplicates.values[-i] + som
+        if som > n_deleted_links:
+            row_stop = i
+            som = som - duplicates.values[-i]
+            print('Number of rows to delete:', i)
+            break
+    
+    for i in range(row_stop):
+        drop_indices = data_timeframe[(data_timeframe[['node1','node2']] == duplicates.index[-i]).all(1)].index.tolist()
+        data_dropped = data_dropped.drop(drop_indices)
+        if i  % 100 == 0:
+            print('We are at:', round(i/row_stop*100), '%. Elapsed Time', round(timeit.default_timer()-start))
+    
+    n_removed = int(n_deleted_links - som)
+    drop_indices = data[(data[['node1','node2']] == duplicates.index[-(row_stop+1)]).all(1)].index.tolist()
+    data_dropped = data_dropped.drop(random.sample(drop_indices,n_removed))
+    
+    print(len(data)-len(data_dropped), 'links are deleted')
+    
 
 """Starting from here is the evaluation of the infections"""
 
@@ -223,23 +258,3 @@ plt.xlabel('Timestamp')
 plt.ylabel('Average Percentage of Nodes')
 #plt.title(r'Average % of infected and removed nodes versus time with $\sigma$')
 
-plt.figure()
-plt.plot(t,y1,'k',x,y2,'k')
-plt.axes(ylim=(0,100),xlim=(0,np.max(x)))
-plt.fill_between(t,y1,y2,where=y2>=y1,facecolor = 'teal')
-plt.fill_between(t,0,y1,facecolor = 'r')
-plt.fill_between(t,y2,100,facecolor = 'silver')
-#plt.title('Average % of infected and removed nodes versus time')
-plt.xlabel('Timestamp')
-plt.ylabel('Average Percentage of Nodes')
-plt.legend(('Susceptible','Infected' , 'Removed'))
-
-plt.figure()
-plt.axes(ylim=(0,100),xlim=(0,np.max(x)))
-plt.plot(t,ExpVal, 'k')
-plt.plot(t,ExpVal_sus, 'b')
-plt.plot(t,ExpVal_rem, 'r')
-#plt.title('SIR Model')
-plt.legend(('Infected' ,'Susceptible', 'Removed'))
-plt.xlabel('Timestamp')
-plt.ylabel('Average Percentage of Nodes')
