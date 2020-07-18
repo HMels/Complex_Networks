@@ -8,8 +8,12 @@ import timeit
 import random
 
 #simulation = 'HS2011'
-simulation = 'Haggle' 
+#simulation = 'Haggle' 
 #simulation = 'MIT'
+simulation = 'Haggle_trimmed'  #don't forget to delete the first column in excel
+                                #look at trimming_dataset.py to trim other datasets of 
+                                #unnused timestamps
+
 
 if simulation == 'HS2011':
     data = pd.read_csv(r'thiers_2011.csv', delim_whitespace=True, header =None)
@@ -64,8 +68,12 @@ if simulation == 'HS2013':
     for i in range(len(test.unique())):
         data['node2'] = data['node2'].where(data['node2']!=sorted(test.unique())[i],other = i+unique_node1)    
       
+if simulation == 'Haggle_trimmed':
+    data = pd.read_excel (r'data_Haggle_sorted_trimmed.xlsx')
+    
 if simulation == 'Haggle':
     data = pd.read_excel (r'data_Haggle_sorted.xlsx')
+
     
 if simulation == 'MIT':
     data = pd.read_excel (r'MIT_data_sorted.xlsx')
@@ -90,6 +98,9 @@ if simulation == 'Haggle':
     Tinf = 1843
 if simulation == 'MIT':
     data['timestamp'] = ( data['timestamp'] - tmin)/600
+    Tinf = 1843
+if simulation == 'Haggle_trimmed':
+    data['timestamp'] = ( data['timestamp'] - tmin)
     Tinf = 1843
 
 tmax = int(data.timestamp.max())
@@ -204,12 +215,8 @@ for i in range(0,tmax):
     if i > Tbegin: #start mitigation only in this window    
         Inf_time = Inf_time + Inf
         if choose_situation == 'Isolation': # isolation from t = i + Tisolation until infinity
-            #isolated = np.argwhere(Inf_time>Tisolation) #list with indices of isolated nodes
-            #Removed[isolated] = 1 #matrix with removed nodes at t=i, can be adjusted to have gamma
-            #Removed_total[i,:] = np.sum(Removed,0) #total number of removed nodes per timestep per starting node
-            #Inf[isolated]=0   #in isolation, you can't be infected again
             Inf = np.where(Inf_time>Tisolation, 0, Inf) #isolated nodes cannot be infective
-            Removed = np.where(Inf_time>Tisolation, 1, Removed)
+            Removed = np.where(Inf_time>Tisolation, 1, Removed) #isolated nodes are removed
             Removed_total[i,:] = np.sum(Removed,0) #total number of removed nodes per timestep per starting node
 
     Aoud = Inf #- Removed[i,:,:] #current infected nodes
@@ -240,8 +247,12 @@ ExpVal_sus = np.sum(Susceptible, axis = 1) /(Nnodes**2)*100
 t=np.linspace(1,tmax,len(ExpVal))
 
 plt.figure()
-plt.errorbar(t,ExpVal+ExpVal_rem,yerr = StandardDev+StandardDev_rem, errorevery = 400, ecolor = 'r', color = 'k')
-plt.errorbar(t,100 - ExpVal_rem,yerr = StandardDev_rem, errorevery = 452, ecolor = 'y', color = 'b')
+if choose_situation == 'Isolation':
+    #Isolated nodes (removed) should still be counted as infected
+    plt.errorbar(t,ExpVal + ExpVal_rem,yerr = StandardDev + StandardDev_rem, errorevery = 400, ecolor = 'r', color = 'k')
+else:
+    plt.errorbar(t,ExpVal,yerr = StandardDev, errorevery = 400, ecolor = 'r', color = 'k')
+plt.errorbar(t,ExpVal_rem,yerr = StandardDev_rem, errorevery = 452, ecolor = 'y', color = 'b')
 
 plt.legend(('Infected' , 'Removed'))
 plt.xlabel('Timestamp')
