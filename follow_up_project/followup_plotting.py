@@ -9,6 +9,11 @@ HS11_b = np.load(r'LU_10percent_dropped/HS2011_10_40.npy')
 HS11_c = np.load(r'LU_10percent_dropped/HS2011_10_60.npy')
 HS11_d = np.load(r'LU_10percent_dropped/HS2011_10_80.npy')
 HS11_e = np.load(r'LU_10percent_dropped/HS2011_10_100.npy')
+HS11_f = np.load(r'LU_10percent_dropped/HS2011_20_40.npy')
+HS11_g = np.load(r'LU_10percent_dropped/HS2011_20_60.npy')
+HS11_h = np.load(r'LU_10percent_dropped/HS2011_20_80.npy')
+HS11_i = np.load(r'LU_10percent_dropped/HS2011_20_100.npy')
+HS11_j = np.load(r'LU_10percent_dropped/HS2011_40_60.npy')
 
 
 #HS12 = np.load(r'HS2012.npy')
@@ -26,6 +31,12 @@ plt.plot(np.linspace(0,1,len(HS11_b)), HS11_b, label='10-40%')
 plt.plot(np.linspace(0,1,len(HS11_c)), HS11_c, label='10-60%')
 plt.plot(np.linspace(0,1,len(HS11_d)), HS11_d, label='10-80%')
 plt.plot(np.linspace(0,1,len(HS11_e)), HS11_e, label='10-100%')
+plt.plot(np.linspace(0,1,len(HS11_f)), HS11_f, label='20-40%',linestyle='dashed')
+plt.plot(np.linspace(0,1,len(HS11_g)), HS11_g, label='20-60%',linestyle='dashed')
+plt.plot(np.linspace(0,1,len(HS11_h)), HS11_h, label='20-80%',linestyle='dashed')
+plt.plot(np.linspace(0,1,len(HS11_i)), HS11_i, label='20-100%',linestyle='dashed')
+plt.plot(np.linspace(0,1,len(HS11_j)), HS11_j, label='40-60%',linestyle='dotted')
+
 
 
 #plt.plot(np.linspace(0,1,len(HS12)), HS12, label='HS12')

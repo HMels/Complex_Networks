@@ -7,10 +7,10 @@ import numpy.random as rnd
 import timeit
 import random
 
-#simulation = 'HS2011'
+simulation = 'HS2011'
 #simulation = 'Haggle' 
 #simulation = 'MIT'
-simulation = 'Haggle_trimmed'  #don't forget to delete the first column in excel
+#simulation = 'Haggle_trimmed'  #don't forget to delete the first column in excel
                                 #look at trimming_dataset.py to trim other datasets of 
                                 #unnused timestamps
 
@@ -126,14 +126,14 @@ if True: #if you want a fixed infection time
 """Mittigation strategy"""
 
 situations = ['No effects', 'Random', 'Isolation', 'Least used links', 'Max number of links']
-choose_situation = situations[2]
+choose_situation = situations[3]
 
-T10 = 1000
+T10 = 445
 Tbegin = T10
 Tend = tmax
-percentage_dropped = 0.6
+percentage_dropped = 0.1
 
-Tisolation = 5000
+Tisolation = int(0.2*tmax)
 
 if choose_situation != 'No effects':
     print('Links are being deleted')
@@ -146,10 +146,10 @@ if choose_situation == 'Least used links':
     n_deleted_links = len(data_timeframe)*percentage_dropped
 
     som = 0
-    for i in range(len(duplicates)):
-        som = duplicates.values[-i] + som
+    for i in range(1,len(duplicates)+1):
+        som += duplicates.values[-i]
         if som > n_deleted_links:
-            row_stop = i
+            row_stop = i-1
             som = som - duplicates.values[-i]
             print('Number of rows to delete:', i)
             break
@@ -243,8 +243,9 @@ StandardDev = np.std(Infections, axis = 1)/Nnodes *100       # percentage of tot
 ExpVal_rem = np.sum(Removed_total, axis = 1)/(Nnodes**2)*100  
 StandardDev_rem = np.std(Removed_total, axis = 1)/Nnodes*100 
 ExpVal_sus = np.sum(Susceptible, axis = 1) /(Nnodes**2)*100 
+StandardDev_sus = np.std(Removed_total, axis = 1)/Nnodes*100 
 
-t=np.linspace(1,tmax,len(ExpVal))
+t=np.linspace(0,1,len(ExpVal))
 
 plt.figure()
 if choose_situation == 'Isolation':
@@ -271,6 +272,6 @@ T10 = min(np.argwhere(ExpVal>=10))
 T20 = min(np.argwhere(ExpVal>=20))
 T40 = min(np.argwhere(ExpVal>=40))
 T60 = min(np.argwhere(ExpVal>=60))
-T80 = 0 #min(np.argwhere(ExpVal>=80))
+T80 = min(np.argwhere(ExpVal>=80))
 T90 = 0 #min(np.argwhere(ExpVal>=90))
 timestamps_inf = np.array([T10,T20,T40,T60,T80,T90])
