@@ -7,7 +7,9 @@ import numpy.random as rnd
 import timeit
 import random
 
-simulation = 'HS2011'
+#simulation = 'HS2011'
+#simulation = 'HS2012'
+simulation = 'HS2013'
 #simulation = 'Haggle' 
 #simulation = 'MIT'
 #simulation = 'Haggle_trimmed'  #don't forget to delete the first column in excel
@@ -16,7 +18,7 @@ simulation = 'HS2011'
 
 
 if simulation == 'HS2011':
-    data = pd.read_csv(r'thiers_2011.csv', delim_whitespace=True, header =None)
+    data = pd.read_csv(r'C:\Users\rixtb\Complex_Networks\follow_up_project\thiers_2011.csv', delim_whitespace=True, header =None)
     data.columns = ['timestamp', 'node1', 'node2', 'triv1', 'triv2']
     data = data.drop(columns =['triv1','triv2'])
     data = data[['node1', 'node2', 'timestamp']]
@@ -87,18 +89,23 @@ tmin = np.max([data['timestamp'].min()])
 if simulation == 'HS2011':
     data['timestamp'] = np.round(( data['timestamp'] - tmin)/20)
     Tinf = 1843
+    T10 = 46
 if simulation == 'HS2012':
     data['timestamp'] = np.round(( data['timestamp'] - tmin)/20)
     Tinf = 1843
+    T10 = 439
 if simulation == 'HS2013':
     data['timestamp'] = np.round(( data['timestamp'] - tmin)/20)
     Tinf = 1843
+    T10 = 49
 if simulation == 'Haggle':
     data['timestamp'] = np.round(( data['timestamp'] - tmin)/20) 
     Tinf = 1843
+    T10 = 2859
 if simulation == 'MIT':
     data['timestamp'] = ( data['timestamp'] - tmin)/600
     Tinf = 1843
+    T10 = 3
 if simulation == 'Haggle_trimmed':
     data['timestamp'] = ( data['timestamp'] - tmin)
     Tinf = 1843
@@ -112,7 +119,6 @@ beta = 1
 plt.close("all")
 
 start = timeit.default_timer()
-
 Infections = np.zeros([tmax,Nnodes])
 #Removed = np.zeros([tmax,Nnodes, Nnodes])
 Removed_total = np.zeros([tmax,Nnodes])
@@ -120,20 +126,20 @@ Susceptible = np.zeros([tmax,Nnodes])
 data_dropped = data
 
 if True: #if you want a fixed infection time
-    Inf_time = np.eye(Nnodes)   #time node is infected
+    Inf_time = np.zeros(Nnodes)   #time node is infected
     Removed = np.zeros([Nnodes, Nnodes])
 
 """Mittigation strategy"""
 
 situations = ['No effects', 'Random', 'Isolation', 'Least used links', 'Max number of links']
-choose_situation = situations[3]
+choose_situation = situations[2]
 
-T10 = 445
+#T10 = 460
 Tbegin = T10
 Tend = tmax
 percentage_dropped = 0.1
 
-Tisolation = int(0.2*tmax)
+Tisolation = int(0.1*tmax)
 
 if choose_situation != 'No effects':
     print('Links are being deleted')
@@ -196,6 +202,7 @@ Aoud = np.eye(Nnodes)
 unit = np.eye(Nnodes)
 isolated = np.zeros(Nnodes)
 inf_t = np.zeros([Nnodes,2])
+Inf2 = np.zeros([Nnodes,Nnodes])
 
 for i in range(0,tmax):
     data_temp = data_dropped[data_dropped.timestamp==i].values
@@ -213,16 +220,21 @@ for i in range(0,tmax):
 
         
     if i > Tbegin: #start mitigation only in this window    
-        Inf_time = Inf_time + Inf
         if choose_situation == 'Isolation': # isolation from t = i + Tisolation until infinity
-            Inf = np.where(Inf_time>Tisolation, 0, Inf) #isolated nodes cannot be infective
-            Removed = np.where(Inf_time>Tisolation, 1, Removed) #isolated nodes are removed
-            Removed_total[i,:] = np.sum(Removed,0) #total number of removed nodes per timestep per starting node
+            Inf = Inf + Inf2    
+            Inf[Inf>0]=1
+            Inf_time = Inf_time + Inf
+            Inf2 = np.where((Inf_time<Tisolation) & (Inf_time>0), 1, 0) #isolated nodes cannot be infective
+#            Inf2 = np.where((Inf_time>=Tisolation) & (Inf_time>=0), 0, 0) #isolated nodes cannot be infective
+#            Inf = np.where((Inf_time>=Tisolation) & (Inf_time>=0), 1, Inf) #isolated nodes cannot be infective
+            Inf = Inf - Inf2
+#            Removed = np.where(Inf_time>Tisolation, 1, Removed) #isolated nodes are removed
+#            Removed_total[i,:] = np.sum(Removed,0) #total number of removed nodes per timestep per starting node
 
     Aoud = Inf #- Removed[i,:,:] #current infected nodes
     Aoud[Aoud<0]=0    
             
-    Infections[i,:] = np.sum(Aoud, axis=0)
+    Infections[i,:] = np.sum(Aoud+Inf2, axis=0)
     Susceptible[i,:] = Nnodes - Removed_total[i,:] - Infections[i,:]
     if i  % 2000 == 0:
         print('We are at:', round(i/tmax*100), '%')
