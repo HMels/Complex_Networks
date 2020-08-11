@@ -7,18 +7,18 @@ import numpy.random as rnd
 import timeit
 import random
 
-#simulation = 'HS2011'
+simulation = 'HS2011'
 #simulation = 'HS2012'
 #simulation = 'HS2013'
 #simulation = 'Haggle' 
-simulation = 'MIT'
+#simulation = 'MIT'
 #simulation = 'Haggle_trimmed'  #don't forget to delete the first column in excel
                                 #look at trimming_dataset.py to trim other datasets of 
                                 #unnused timestamps
 
 
 if simulation == 'HS2011':
-    data = pd.read_csv(r'C:\Users\rixtb\Complex_Networks\follow_up_project\thiers_2011.csv', delim_whitespace=True, header =None)
+    data = pd.read_csv(r'thiers_2011.csv', delim_whitespace=True, header =None)
     data.columns = ['timestamp', 'node1', 'node2', 'triv1', 'triv2']
     data = data.drop(columns =['triv1','triv2'])
     data = data[['node1', 'node2', 'timestamp']]
@@ -139,7 +139,7 @@ Tbegin = T10
 Tend = tmax
 percentage_dropped = 0.1
 
-Tisolation = int(0.1*tmax)
+Tisolation = 2 #int(0*tmax)
 
 if choose_situation != 'No effects':
     print('Links are being deleted')
@@ -200,10 +200,8 @@ if choose_situation == 'Max number of links':
 
 Aoud = np.eye(Nnodes)
 unit = np.eye(Nnodes)
-isolated = np.zeros(Nnodes)
 inf_t = np.zeros([Nnodes,2])
 Inf2 = np.zeros([Nnodes,Nnodes])
-isolatedlinks = np.zeros([Nnodes, Nnodes])
 Ndropped = 0
 
 for i in range(0,tmax):
@@ -218,8 +216,8 @@ for i in range(0,tmax):
                 A[int(data_temp[j,0]-1),int(data_temp[j,1]-1)] = 1
                 A[int(data_temp[j,1]-1),int(data_temp[j,0]-1)] = 1
         Inf = np.dot(A+unit,Aoud) #infectable content
-        isolatedlinks = np.dot(A, Inf2)
-        Ndropped = Ndropped + np.sum(np.sum(isolatedlinks, axis=0))
+#        isolatedlinks = np.dot(A, Inf2)
+#        Ndropped = Ndropped + np.sum(np.sum(isolatedlinks, axis=0))
         Inf[Inf>0]=1
 
         
@@ -229,7 +227,23 @@ for i in range(0,tmax):
             Inf[Inf>0]=1
             Inf_time = Inf_time + Inf
             Inf2 = np.where((Inf_time<Tisolation) & (Inf_time>0), 1, 0) #isolated nodes cannot be infective
-#            Inf2 = np.where((Inf_time>=Tisolation) & (Inf_time>=0), 0, 0) #isolated nodes cannot be infective
+            isolated_indices = np.nonzero(Inf2)
+            
+            for l in range(Nnodes):
+                isolated_nodes=np.where(isolated_indices[0]==l,isolated_indices[1],-1)
+                isolated_nodes= isolated_nodes[isolated_nodes>-0.5]
+                for k in range(len(data_temp)):
+                    if data_temp[k,0] in isolated_nodes:
+                        Ndropped += 1
+                for k in range(len(isolated_nodes)):
+                    data_temp = np.delete(data_temp,np.where(data_temp[:,0]==isolated_nodes[k]),axis=0)    
+                
+                for k in range(len(data_temp)):
+                    if data_temp[k,1] in isolated_nodes:
+                        Ndropped += 1
+                    
+            
+#           Inf2 = np.where((Inf_time>=Tisolation) & (Inf_time>=0), 0, 0) #isolated nodes cannot be infective
 #            Inf = np.where((Inf_time>=Tisolation) & (Inf_time>=0), 1, Inf) #isolated nodes cannot be infective
             Inf = Inf - Inf2
 #            Removed = np.where(Inf_time>Tisolation, 1, Removed) #isolated nodes are removed
@@ -237,75 +251,7 @@ for i in range(0,tmax):
 
     Aoud = Inf #- Removed[i,:,:] #current infected nodes
     Aoud[Aoud<0]=0    
-#"""Define some functions for the isolation algorithm"""
-#def update_isolation(isolated,inf_t,t,isolation,isolation_time):
-#    for i in range(len(isolated)):
-#        if inf_t[i,1] == t - isolation:
-#            if isolated[i] == 0:
-#                isolated[i] = 1
-#        elif inf_t[i,1] == t - (isolation_time+isolation):
-#            if isolated[i] == 1:
-#                isolated[i] = 0
-#    return isolated
-#
-#def drop_isolated_links(isolated,data_temp):
-#    nonzero = np.nonzero(isolated)[0]
-#    dropped1 = data_temp[data_temp.node1.isin(nonzero)].index
-#    Ndropped = len(dropped1)
-#    iso_data = data_temp.drop(dropped1)
-#    dropped2 = iso_data[iso_data.node2.isin(nonzero)].index
-#    Ndropped = len(dropped2) + Ndropped
-#    iso_data = iso_data.drop(dropped2)
-#    return iso_data, Ndropped
-#
-#Aoud = np.eye(Nnodes)
-#unit = np.eye(Nnodes)
-#isolated = np.zeros(Nnodes)
-#inf_t = np.zeros([Nnodes,2])
-#isolation = 1    #isolation after this time frame
-#isolation_time = int(0.1*tmax)
-# #duration of isolation
-#Ndropped = 0
-#
-#
-#stop = timeit.default_timer()
-#print('Starting evaluation,elapsed time till now', round(stop-start))
-#
-#for i in range(0,tmax):
-#    if choose_situation == 'Isolation':
-#        data_temp = data[data.timestamp==i]
-#        if i>Tbegin:
-#            isolated = update_isolation(isolated,inf_t,i,isolation,isolation_time)
-#            data_temp,Ndropped_i = drop_isolated_links(isolated,data_temp)
-#            Ndropped = Ndropped +Ndropped_i
-#        data_temp = data_temp.values
-#    else:
-#        data_temp = data_dropped[data_dropped.timestamp==i].values
-#    
-#    A = np.zeros([Nnodes,Nnodes])
-#    w = int(len(data_temp))
-#    
-#    if data_temp.size:
-#        for j in range(w):
-#            p = rnd.rand()
-#            if p<beta:    # When p is smaller than beta, (0.11<0.2) then the contact will be counted as an infection, if not, no infection so no changes in infection matrix
-#                A[int(data_temp[j,0]-1),int(data_temp[j,1]-1)] = 1
-#                A[int(data_temp[j,1]-1),int(data_temp[j,0]-1)] = 1
-#                if choose_situation == 'Isolation' and i>Tbegin:
-#                    if inf_t[int(data_temp[j,0]-1),0] == 0:
-#                        inf_t[int(data_temp[j,0]-1),0] = 1
-#                        inf_t[int(data_temp[j,0]-1),1] = i
-#                    elif inf_t[int(data_temp[j,1]-1),0] == 0:
-#                        inf_t[int(data_temp[j,1]-1),0] = 1
-#                        inf_t[int(data_temp[j,1]-1),1] = i
-#                    else:
-#                        pass
-#                else:
-#                    pass
-#        Inf = np.dot(A+unit,Aoud) #infectable content
-#        Inf[Inf>0]=1
-#        Aoud = Inf - Removed #current infected nodes
-#        Aoud[Aoud<0]=0
+
             
     Infections[i,:] = np.sum(Aoud+Inf2, axis=0)
     Susceptible[i,:] = Nnodes - Removed_total[i,:] - Infections[i,:]
