@@ -7,11 +7,11 @@ import numpy.random as rnd
 import timeit
 import random
 
-simulation = 'HS2011'
+#simulation = 'HS2011'
 #simulation = 'HS2012'
 #simulation = 'HS2013'
 #simulation = 'Haggle' 
-#simulation = 'MIT'
+simulation = 'MIT'
 #simulation = 'Haggle_trimmed'  #don't forget to delete the first column in excel
                                 #look at trimming_dataset.py to trim other datasets of 
                                 #unnused timestamps
@@ -132,14 +132,21 @@ if True: #if you want a fixed infection time
 """Mittigation strategy"""
 
 situations = ['No effects', 'Random', 'Isolation', 'Least used links', 'Max number of links']
-choose_situation = situations[2]
+choose_situation = situations[1]
 
 #T10 = 460
 Tbegin = T10
 Tend = tmax
-percentage_dropped = 0.1
+percentage_dropped = 0.3
 
-Tisolation = 2 #int(0*tmax)
+Tisolation = int(0.1*tmax)
+
+if choose_situation == 'Random':
+    n_removed = int(percentage_dropped*Nlinks)
+    delete_row = random.sample(range(len(data)),n_removed)
+    data_dropped = data_dropped.drop(delete_row)
+    
+    print(len(data)-len(data_dropped), 'links are deleted')
 
 if choose_situation != 'No effects':
     print('Links are being deleted')
@@ -209,6 +216,23 @@ for i in range(0,tmax):
     A = np.zeros([Nnodes,Nnodes])
     w = int(len(data_temp))
     
+    if i > Tbegin + 1 and choose_situation == 'Isolation':
+        isolated_indices = np.nonzero(Inf2)
+        data_temp2 = data_temp
+        for l in range(Nnodes):
+                isolated_nodes=np.where(isolated_indices[1]==l,isolated_indices[0],-1)
+                isolated_nodes= isolated_nodes[isolated_nodes>-0.5]+1
+                for k in range(len(data_temp2)):
+                    if data_temp2[k,0] in isolated_nodes:
+                        Ndropped += 1
+                        
+                for k in range(len(isolated_nodes)):
+                    data_temp2 = np.delete(data_temp2,np.where(data_temp2[:,0]==isolated_nodes[k]),axis=0)    
+                
+                for k in range(len(data_temp2)):
+                    if data_temp2[k,1] in isolated_nodes:
+                        Ndropped += 1
+    
     if data_temp.size:
         for j in range(w):
             p = 0#rnd.rand()
@@ -227,20 +251,9 @@ for i in range(0,tmax):
             Inf[Inf>0]=1
             Inf_time = Inf_time + Inf
             Inf2 = np.where((Inf_time<Tisolation) & (Inf_time>0), 1, 0) #isolated nodes cannot be infective
-            isolated_indices = np.nonzero(Inf2)
             
-            for l in range(Nnodes):
-                isolated_nodes=np.where(isolated_indices[0]==l,isolated_indices[1],-1)
-                isolated_nodes= isolated_nodes[isolated_nodes>-0.5]
-                for k in range(len(data_temp)):
-                    if data_temp[k,0] in isolated_nodes:
-                        Ndropped += 1
-                for k in range(len(isolated_nodes)):
-                    data_temp = np.delete(data_temp,np.where(data_temp[:,0]==isolated_nodes[k]),axis=0)    
-                
-                for k in range(len(data_temp)):
-                    if data_temp[k,1] in isolated_nodes:
-                        Ndropped += 1
+            
+            
                     
             
 #           Inf2 = np.where((Inf_time>=Tisolation) & (Inf_time>=0), 0, 0) #isolated nodes cannot be infective
