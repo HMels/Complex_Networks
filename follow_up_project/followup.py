@@ -8,13 +8,11 @@ import timeit
 import random
 
 #simulation = 'HS2011'
-#simulation = 'HS2012'
+simulation = 'HS2012'
 #simulation = 'HS2013'
 #simulation = 'Haggle' 
-simulation = 'MIT'
-#simulation = 'Haggle_trimmed'  #don't forget to delete the first column in excel
-                                #look at trimming_dataset.py to trim other datasets of 
-                                #unnused timestamps
+#simulation = 'MIT'
+
 
 
 if simulation == 'HS2011':
@@ -70,8 +68,6 @@ if simulation == 'HS2013':
     for i in range(len(test.unique())):
         data['node2'] = data['node2'].where(data['node2']!=sorted(test.unique())[i],other = i+unique_node1)    
       
-if simulation == 'Haggle_trimmed':
-    data = pd.read_excel (r'data_Haggle_sorted_trimmed.xlsx')
     
 if simulation == 'Haggle':
     data = pd.read_excel (r'data_Haggle_sorted.xlsx')
@@ -132,7 +128,7 @@ if True: #if you want a fixed infection time
 """Mittigation strategy"""
 
 situations = ['No effects', 'Random', 'Isolation', 'Least used links', 'Max number of links']
-choose_situation = situations[1]
+choose_situation = situations[2]
 
 #T10 = 460
 Tbegin = T10
@@ -140,10 +136,13 @@ Tend = tmax
 percentage_dropped = 0.3
 
 Tisolation = int(0.1*tmax)
-
-if choose_situation == 'Random':
-    n_removed = int(percentage_dropped*Nlinks)
-    delete_row = random.sample(range(len(data)),n_removed)
+    
+if choose_situation == 'Random': 
+    T_begin_indice = np.min(np.argwhere(data_dropped['timestamp'] >= Tbegin))
+    n_window = Nlinks-T_begin_indice
+    n_removed = int(percentage_dropped*n_window) #only 90% of total timewindow
+    
+    delete_row = random.sample(range(n_window),n_removed) + T_begin_indice
     data_dropped = data_dropped.drop(delete_row)
     
     print(len(data)-len(data_dropped), 'links are deleted')
@@ -210,28 +209,12 @@ unit = np.eye(Nnodes)
 inf_t = np.zeros([Nnodes,2])
 Inf2 = np.zeros([Nnodes,Nnodes])
 Ndropped = 0
+dropped_nodes = np.zeros([Nnodes,1]) #for the isolation, the # of dropped nodes per column
 
 for i in range(0,tmax):
     data_temp = data_dropped[data_dropped.timestamp==i].values
     A = np.zeros([Nnodes,Nnodes])
     w = int(len(data_temp))
-    
-    if i > Tbegin + 1 and choose_situation == 'Isolation':
-        isolated_indices = np.nonzero(Inf2)
-        data_temp2 = data_temp
-        for l in range(Nnodes):
-                isolated_nodes=np.where(isolated_indices[1]==l,isolated_indices[0],-1)
-                isolated_nodes= isolated_nodes[isolated_nodes>-0.5]+1
-                for k in range(len(data_temp2)):
-                    if data_temp2[k,0] in isolated_nodes:
-                        Ndropped += 1
-                        
-                for k in range(len(isolated_nodes)):
-                    data_temp2 = np.delete(data_temp2,np.where(data_temp2[:,0]==isolated_nodes[k]),axis=0)    
-                
-                for k in range(len(data_temp2)):
-                    if data_temp2[k,1] in isolated_nodes:
-                        Ndropped += 1
     
     if data_temp.size:
         for j in range(w):
@@ -247,6 +230,25 @@ for i in range(0,tmax):
         
     if i > Tbegin: #start mitigation only in this window    
         if choose_situation == 'Isolation': # isolation from t = i + Tisolation until infinity
+            
+            ###### counting the dropped links in isolation
+            if True: #turn off for speed
+                for ii in range(Nnodes):
+                    isolation_i = Inf2[:,ii]
+                    
+                    isolated_nodes = np.argwhere(isolation_i>0)
+                    N_isolated = len(isolated_nodes)
+                    A_temp = A
+                    for ij in range(N_isolated):
+                        for ik in range(N_isolated):
+                            jj = int(isolated_nodes[ij])
+                            kk = int(isolated_nodes[ik])
+                            if jj<kk:
+                                A_temp[jj,kk] = 0
+                    dropped_nodes[ii] += np.sum(np.dot(A_temp,isolation_i))
+                    
+            ######
+            
             Inf = Inf + Inf2    
             Inf[Inf>0]=1
             Inf_time = Inf_time + Inf
@@ -280,6 +282,11 @@ tmaxinf = np.argmax(np.sum(Infections,axis=1))
 print('The timestamp of the maximum percentage of infections is:',tmaxinf)
 Scsleft = np.sum(Susceptible[-1])/(Nnodes**2)*100
 print('There are',Scsleft,'% susceptible nodes left on average')
+
+#dropped links
+average_dropped = np.sum(dropped_nodes)/Nnodes
+plt.plot(dropped_nodes); plt.axhline(5807,xmin=0,xmax = Nnodes)
+plt.xlabel('node number'); plt.ylabel('number of links dropped')
 
 #%%
 ExpVal = np.sum(Infections, axis = 1)/(Nnodes**2)*100  #percentage of total nodes
