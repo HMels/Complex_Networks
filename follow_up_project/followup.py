@@ -8,9 +8,9 @@ import timeit
 import random
 
 #simulation = 'HS2011'
-simulation = 'HS2012'
+#simulation = 'HS2012'
 #simulation = 'HS2013'
-#simulation = 'Haggle' 
+simulation = 'Haggle' 
 #simulation = 'MIT'
 
 
@@ -246,7 +246,6 @@ for i in range(0,tmax):
                             if jj<kk:
                                 A_temp[jj,kk] = 0
                     dropped_nodes[ii] += np.sum(np.dot(A_temp,isolation_i))
-                    
             ######
             
             Inf = Inf + Inf2    
@@ -284,8 +283,9 @@ Scsleft = np.sum(Susceptible[-1])/(Nnodes**2)*100
 print('There are',Scsleft,'% susceptible nodes left on average')
 
 #dropped links
-average_dropped = np.sum(dropped_nodes)/Nnodes
-plt.plot(dropped_nodes); plt.axhline(5807,xmin=0,xmax = Nnodes)
+average_dropped = np.sum(dropped_nodes)/Nnodes;
+print(average_dropped,' links dropped on average')
+plt.plot(dropped_nodes); plt.axhline(average_dropped,xmin=0,xmax = Nnodes)
 plt.xlabel('node number'); plt.ylabel('number of links dropped')
 
 #%%
