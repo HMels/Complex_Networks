@@ -232,7 +232,7 @@ for i in range(0,tmax):
         if choose_situation == 'Isolation': # isolation from t = i + Tisolation until infinity
             
             ###### counting the dropped links in isolation
-            if True: #turn off for speed
+            if False: #turn off for speed
                 for ii in range(Nnodes):
                     isolation_i = Inf2[:,ii]
                     
