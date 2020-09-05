@@ -10,9 +10,11 @@ import random
 simulation = 'HS2011'
 #simulation = 'HS2012'
 #simulation = 'HS2013'
-#simulation = 'Haggle' 
+# simulation = 'Haggle' 
 #simulation = 'MIT'
 
+# plt.close("all")
+plt.figure()
 
 
 if simulation == 'HS2011':
@@ -112,7 +114,6 @@ beta = 1
 
 #%% Analysis
 """Non temporal Situations are described and started here"""
-plt.close("all")
 
 start = timeit.default_timer()
 Infections = np.zeros([tmax,Nnodes])
@@ -135,12 +136,14 @@ Tbegin = T10
 Tend = tmax
 percentage_dropped = 0.3
 
+Inf_Isolation = np.zeros([Nnodes,Nnodes])                                  # the infected nodes that are in isolation
+dropped_nodes = np.zeros([Nnodes,1])
+
 if choose_situation == 'Isolation':
     Tisolation = int(0.1*tmax)
-    Inf_Isolation = np.zeros([Nnodes,Nnodes])                                  # the infected nodes that are in isolation
-    inf3 = Inf_Isolation
+    Inf3 = Inf_Isolation
     inftime_niet = Inf_Isolation
-    dropped_nodes = np.zeros([Nnodes,1])                                       # for the isolation, the # of dropped nodes per column
+                                           # for the isolation, the # of dropped nodes per column
     
     degree = np.zeros(Nnodes)                                                  # calculating the degree of the dataset
     for i in range(Nnodes): 
@@ -266,32 +269,46 @@ for i in range(0,tmax):
             if False: # random based
                 Inf3 = Inf3 * np.random.rand(Nnodes, Nnodes)                       
                 Inf3 = np.where((Inf3>0) & (Inf3<0.2), 1, 0)                   # 20% are deviant
+                inftime_niet = inftime_niet + 1                                    # de volgende 3 lijnen aan code aan rixt vragen
+                inftime_niet = np.where((inftime_niet>1), inftime_niet,0)
+                inftime_niet = inftime_niet +Inf3
             
-            if False: # degree based (non-probabilistic)
-                for aa in Nnodes:
+                Inf_niet = np.where((inftime_niet<Tisolation) & (inftime_niet>0), 1, 0) 
+            
+                Inf_Isolation = Inf_Isolation - Inf_niet            
+            
+            if True: # degree based (non-probabilistic)
+                for aa in range(Nnodes):
                     arrayx = (Inf3[:,aa])
                     array = np.transpose(arrayx)
                     array1 = np.argwhere(array>0)                              # filtering the nodes that might be deviant
                     array2 = np.argsort(np.argsort(top_degree[array1], axis = 0),axis = 0) # ranking these nodes             
-                    array2 = array2 / np.max(array2)                           # normalize 
-                    array2 = np.where(array2 < 0.2, 1, 0                       # 20% lowest degree will be deviant
-                    aa2 = 0
-                    for aa1 in range(len(arrayx)):
-                        if arrayx[aa1] > 0:
-                            print(arrayx)
-                            print(array2[aa1-aa2][0])
-                            arrayx[aa1] = array2[aa2][0]                       # filling it back in 
-                            aa2 += 1
+                    if np.size(array2)>0 and np.max(array2)>0:
+                        array2 = array2 / np.max(array2)                       # normalize 
+                        array2 = np.where(array2 > 0.5, 1, 0)                       # 20% lowest degree will be deviant
+                        aa2 = 0
+                        for aa1 in range(len(arrayx)):
+                            if arrayx[aa1] > 0:
+                                # print(arrayx)
+                                # print(array2[aa1-aa2][0])
+                                arrayx[aa1] = array2[aa2,0]                       # filling it back in 
+                                aa2 += 1
+                                # break
+                    else:
+                        arrayx = np.zeros(Nnodes)
                     Inf3[:,aa] = arrayx
-                
+                        # break
+                # break
             
-            inftime_niet = inftime_niet + 1                                    # de volgende 3 lijnen aan code aan rixt vragen
-            inftime_niet = np.where((inftime_niet>1), inftime_niet,0)
-            inftime_niet = inftime_niet +Inf3
             
-            Inf_niet = np.where((inftime_niet<Tisolation) & (inftime_niet>0), 1, 0) 
+                inftime_niet = inftime_niet + 1                                    # de volgende 3 lijnen aan code aan rixt vragen
+                inftime_niet = np.where((inftime_niet>1), inftime_niet,0)
+                inftime_niet = inftime_niet +Inf3
             
-            Inf_Isolation = Inf_Isolation - Inf_niet                           # Deviant nodes are not isolated
+                Inf_niet = np.where((inftime_niet<Tisolation) & (inftime_niet>0), 1, 0) 
+            
+                Inf_Isolation = Inf_Isolation - Inf_niet                           # Deviant nodes are not isolated
+            # break
             Inf_Isolation[Inf_Isolation>0]=1           
             Inf = Inf - Inf_Isolation                                          # isolated nodes are substracted so that they cannot infect new nodes
 
