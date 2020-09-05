@@ -263,22 +263,26 @@ for i in range(0,tmax):
             
             Inf3 = np.where((Inf_time<2) & (Inf_time>0), 1, 0)                 # dataset to choose the deviant nodes from
            
-            # random based
-            #Inf3 = Inf3 * np.random.rand(Nnodes, Nnodes)                       
-            #Inf3 = np.where((Inf3>0) & (Inf3<0.2), 1, 0)                       # 20% are deviant
+            if False: # random based
+                Inf3 = Inf3 * np.random.rand(Nnodes, Nnodes)                       
+                Inf3 = np.where((Inf3>0) & (Inf3<0.2), 1, 0)                   # 20% are deviant
             
-            # degree based
-            for aa in Nnodes:
-                arrayx = (Inf3[:,aa])
-                array = np.transpose(arrayx)
-                array1 = np.argwhere(array>0)[:,1]                             # filtering the nodes that might be deviant
-                array2 = np.argsort(np.argsort(top_degree[array1], axis = 0),axis = 0) # ranking these nodes             
-                array2 = array2 / np.max(array2)                               # normalize 
-                array2 = np.where(array2 > 0.8, 1, 0)                          # 20% highest degree will be deviant
-                for aaa in range(len(arrayx)):
-                    if arrayx[aaa] > 0:
-                        arrayx[aaa] = array2[aaa]                              # filling it back in 
-                Inf3[:,aa] = arrayx
+            if False: # degree based (non-probabilistic)
+                for aa in Nnodes:
+                    arrayx = (Inf3[:,aa])
+                    array = np.transpose(arrayx)
+                    array1 = np.argwhere(array>0)                              # filtering the nodes that might be deviant
+                    array2 = np.argsort(np.argsort(top_degree[array1], axis = 0),axis = 0) # ranking these nodes             
+                    array2 = array2 / np.max(array2)                           # normalize 
+                    array2 = np.where(array2 < 0.2, 1, 0                       # 20% lowest degree will be deviant
+                    aa2 = 0
+                    for aa1 in range(len(arrayx)):
+                        if arrayx[aa1] > 0:
+                            print(arrayx)
+                            print(array2[aa1-aa2][0])
+                            arrayx[aa1] = array2[aa2][0]                       # filling it back in 
+                            aa2 += 1
+                    Inf3[:,aa] = arrayx
                 
             
             inftime_niet = inftime_niet + 1                                    # de volgende 3 lijnen aan code aan rixt vragen

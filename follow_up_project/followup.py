@@ -7,10 +7,10 @@ import numpy.random as rnd
 import timeit
 import random
 
-#simulation = 'HS2011'
+simulation = 'HS2011'
 #simulation = 'HS2012'
 #simulation = 'HS2013'
-simulation = 'Haggle' 
+#simulation = 'Haggle' 
 #simulation = 'MIT'
 
 
@@ -121,8 +121,8 @@ Removed_total = np.zeros([tmax,Nnodes])
 Susceptible = np.zeros([tmax,Nnodes])
 data_dropped = data
 
-if True: #if you want a fixed infection time
-    Inf_time = np.zeros(Nnodes)   #time node is infected
+if True: # if you want a fixed infection time
+    Inf_time = np.zeros(Nnodes)                                                # time node is infected
     Removed = np.zeros([Nnodes, Nnodes])
 
 """Mittigation strategy"""
@@ -135,12 +135,23 @@ Tbegin = T10
 Tend = tmax
 percentage_dropped = 0.3
 
-Tisolation = int(0.1*tmax)
+if choose_situation == 'Isolation':
+    Tisolation = int(0.1*tmax)
+    Inf_Isolation = np.zeros([Nnodes,Nnodes])                                  # the infected nodes that are in isolation
+    inf3 = Inf_Isolation
+    inftime_niet = Inf_Isolation
+    dropped_nodes = np.zeros([Nnodes,1])                                       # for the isolation, the # of dropped nodes per column
+    
+    degree = np.zeros(Nnodes)                                                  # calculating the degree of the dataset
+    for i in range(Nnodes): 
+        degree[i] = np.sum(np.where(data['node1'] == i+1 ,1,0)) + np.sum(np.where(data['node2'] == i+1 ,1,0))
+    top_degree = np.argsort(np.argsort(degree))                                # ranks the degree per node (so the node with the lowest degree gets a '0' and the highest degree gets an 'Nnodes')
+
     
 if choose_situation == 'Random': 
     T_begin_indice = np.min(np.argwhere(data_dropped['timestamp'] >= Tbegin))
     n_window = Nlinks-T_begin_indice
-    n_removed = int(percentage_dropped*n_window) #only 90% of total timewindow
+    n_removed = int(percentage_dropped*n_window)                               # only 90% of total timewindow
     
     delete_row = random.sample(range(n_window),n_removed) + T_begin_indice
     data_dropped = data_dropped.drop(delete_row)
@@ -186,7 +197,7 @@ if choose_situation == 'Max number of links':
     
     n_deleted_links = len(data_timeframe)*percentage_dropped 
     
-    #determine Lmax:
+    # determine Lmax:
     i=max(duplicates.values); som = 0
     while som < n_deleted_links:
         i = i - 1
@@ -206,11 +217,8 @@ if choose_situation == 'Max number of links':
 
 Aoud = np.eye(Nnodes)
 unit = np.eye(Nnodes)
-inf_t = np.zeros([Nnodes,2])
-Inf2 = np.zeros([Nnodes,Nnodes])
+inf_t = np.zeros([Nnodes,2])                                                   # time to measure the amount of time a node is infected
 Ndropped = 0
-dropped_nodes = np.zeros([Nnodes,1]) #for the isolation, the # of dropped nodes per column
-
 for i in range(0,tmax):
     data_temp = data_dropped[data_dropped.timestamp==i].values
     A = np.zeros([Nnodes,Nnodes])
@@ -218,23 +226,23 @@ for i in range(0,tmax):
     
     if data_temp.size:
         for j in range(w):
-            p = 0#rnd.rand()
-            if p<beta:    # When p is smaller than beta, (0.11<0.2) then the contact will be counted as an infection, if not, no infection so no changes in infection matrix
+            p = 0  #rnd.rand()
+            if p<beta:                                                         # When p is smaller than beta, (0.11<0.2) then the contact will be counted as an infection, if not, no infection so no changes in infection matrix
                 A[int(data_temp[j,0]-1),int(data_temp[j,1]-1)] = 1
                 A[int(data_temp[j,1]-1),int(data_temp[j,0]-1)] = 1
-        Inf = np.dot(A+unit,Aoud) #infectable content
-#        isolatedlinks = np.dot(A, Inf2)
+        Inf = np.dot(A+unit,Aoud)                                              # infectable content
+#        isolatedlinks = np.dot(A, Inf_Isolation)
 #        Ndropped = Ndropped + np.sum(np.sum(isolatedlinks, axis=0))
         Inf[Inf>0]=1
 
         
-    if i > Tbegin: #start mitigation only in this window    
-        if choose_situation == 'Isolation': # isolation from t = i + Tisolation until infinity
+    if i > Tbegin:                                                             # start mitigation only in this window    
+        if choose_situation == 'Isolation':                                    # isolation from t = i until Tisolation 
             
             ###### counting the dropped links in isolation
             if False: #turn off for speed
                 for ii in range(Nnodes):
-                    isolation_i = Inf2[:,ii]
+                    isolation_i = Inf_Isolation[:,ii]
                     
                     isolated_nodes = np.argwhere(isolation_i>0)
                     N_isolated = len(isolated_nodes)
@@ -248,26 +256,50 @@ for i in range(0,tmax):
                     dropped_nodes[ii] += np.sum(np.dot(A_temp,isolation_i))
             ######
             
-            Inf = Inf + Inf2    
+            Inf = Inf + Inf_Isolation                                          # add the infected isolated nodes to the infected nodes  
             Inf[Inf>0]=1
-            Inf_time = Inf_time + Inf
-            Inf2 = np.where((Inf_time<Tisolation) & (Inf_time>0), 1, 0) #isolated nodes cannot be infective
+            Inf_time = Inf_time + Inf                                          # add Inf to count the amount of time a node is infected
+            Inf_Isolation = np.where((Inf_time<Tisolation) & (Inf_time>0), 1, 0)  # the newly isolated nodes
             
+            Inf3 = np.where((Inf_time<2) & (Inf_time>0), 1, 0)                 # dataset to choose the deviant nodes from
+           
+            # random based
+            #Inf3 = Inf3 * np.random.rand(Nnodes, Nnodes)                       
+            #Inf3 = np.where((Inf3>0) & (Inf3<0.2), 1, 0)                       # 20% are deviant
             
+            # degree based
+            for aa in Nnodes:
+                arrayx = (Inf3[:,aa])
+                array = np.transpose(arrayx)
+                array1 = np.argwhere(array>0)[:,1]                             # filtering the nodes that might be deviant
+                array2 = np.argsort(np.argsort(top_degree[array1], axis = 0),axis = 0) # ranking these nodes             
+                array2 = array2 / np.max(array2)                               # normalize 
+                array2 = np.where(array2 > 0.8, 1, 0)                          # 20% highest degree will be deviant
+                for aaa in range(len(arrayx)):
+                    if arrayx[aaa] > 0:
+                        arrayx[aaa] = array2[aaa]                              # filling it back in 
+                Inf3[:,aa] = arrayx
+                
             
-                    
+            inftime_niet = inftime_niet + 1                                    # de volgende 3 lijnen aan code aan rixt vragen
+            inftime_niet = np.where((inftime_niet>1), inftime_niet,0)
+            inftime_niet = inftime_niet +Inf3
             
-#           Inf2 = np.where((Inf_time>=Tisolation) & (Inf_time>=0), 0, 0) #isolated nodes cannot be infective
-#            Inf = np.where((Inf_time>=Tisolation) & (Inf_time>=0), 1, Inf) #isolated nodes cannot be infective
-            Inf = Inf - Inf2
+            Inf_niet = np.where((inftime_niet<Tisolation) & (inftime_niet>0), 1, 0) 
+            
+            Inf_Isolation = Inf_Isolation - Inf_niet                           # Deviant nodes are not isolated
+            Inf_Isolation[Inf_Isolation>0]=1           
+            Inf = Inf - Inf_Isolation                                          # isolated nodes are substracted so that they cannot infect new nodes
+
 #            Removed = np.where(Inf_time>Tisolation, 1, Removed) #isolated nodes are removed
 #            Removed_total[i,:] = np.sum(Removed,0) #total number of removed nodes per timestep per starting node
 
-    Aoud = Inf #- Removed[i,:,:] #current infected nodes
+
+    Aoud = Inf #- Removed[i,:,:]                                               # current infected nodes
     Aoud[Aoud<0]=0    
 
             
-    Infections[i,:] = np.sum(Aoud+Inf2, axis=0)
+    Infections[i,:] = np.sum(Aoud+Inf_Isolation, axis=0)
     Susceptible[i,:] = Nnodes - Removed_total[i,:] - Infections[i,:]
     if i  % 2000 == 0:
         print('We are at:', round(i/tmax*100), '%')
