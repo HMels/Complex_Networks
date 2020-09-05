@@ -224,7 +224,7 @@ inf_t = np.zeros([Nnodes,2])                                                   #
 Ndropped = 0
 
 deviants = top_degree/np.max(top_degree)                                       # for the deviants in the total degree variant
-deviants = np.where(deviants > 0.8 , 1 , 0)
+deviants = np.where(deviants > 0.75 , 1 , 0)
 
 for i in range(0,tmax):
     data_temp = data_dropped[data_dropped.timestamp==i].values
@@ -310,7 +310,7 @@ for i in range(0,tmax):
                 
             if True: # based on total degree 
                 for aa in range(Nnodes):
-                    for aa1 in range(Nnodes)
+                    for aa1 in range(Nnodes):
                         if Inf3[aa1, aa] > 0:                                  # // replaces the possible deviant nodes from Inf3 with 
                             Inf3[aa1, aa] = deviants[aa1]                      #the definite deviant nodes from deviants //
                             
